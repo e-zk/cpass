@@ -5,12 +5,13 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
+	//"flags"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
-	"io/ioutil"
 	"os/exec"
-	"errors"
 	"strings"
 
 	"golang.org/x/crypto/pbkdf2"
@@ -127,7 +128,7 @@ func clipboard(input string) {
 // Returns a pointer to a Bookmark if it can be found within a list of bookmarks
 func getBmark(bmarks Bookmarks, user string, site string) (*Bookmark, error) {
 
-	// 
+	//
 	for _, bmark := range bmarks {
 		if bmark.Url == site && bmark.Username == user {
 			return &bmark, nil
