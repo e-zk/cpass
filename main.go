@@ -53,11 +53,11 @@ func usage() {
 	fmt.Printf("\topen <user@site>\topen bookmark\n")
 }
 
-// Generate password from given secret, username, site URL, and cutoff length
-func genPassword(secret []byte, username string, site string, length int) string {
+// Generate password from given secret, and Bookmark
+func genPassword(secret []byte, bmark *Bookmark) string {
 
 	// the salt is "user@site"
-	salt := fmt.Sprintf("%s@%s", username, site)
+	salt := fmt.Sprintf("%s@%s", bmark.Username, bmark.Url)
 
 	// generate the pbkdf2 key based on the input values
 	pbkdf2Hmac := pbkdf2.Key([]byte(secret), []byte(salt), iterations, 32, sha256.New)
@@ -66,7 +66,7 @@ func genPassword(secret []byte, username string, site string, length int) string
 	b64Encoded := base64.StdEncoding.EncodeToString([]byte(pbkdf2Hmac))
 
 	// cut the encoded key down to the given length; this is the final password
-	return b64Encoded[:length]
+	return b64Encoded[:bmark.Length]
 }
 
 // Get secret from user
@@ -78,18 +78,6 @@ func inputSecret() ([]byte, error) {
 	secret, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 	fmt.Printf("\n")
 	return secret, err
-}
-
-// Return the password from the given bookmark
-func getPass(bmark *Bookmark) string {
-
-	// user input's secret...
-	secret, err := inputSecret()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return genPassword(secret, bmark.Username, bmark.Url, bmark.Length)
 }
 
 // Filter a list of bookmarks, based on a keyword and return bookmarks which match this keyword
@@ -111,6 +99,7 @@ func filterList(bmarks Bookmarks, filter string) Bookmarks {
 
 // Print a list of bookmarks out
 func list(bmarks Bookmarks) {
+
 	// foreach bookmark in the bookmarks array...
 	for _, bmark := range bmarks {
 		fmt.Printf("%s@%s (%d)\n", bmark.Username, bmark.Url, bmark.Length)
@@ -119,10 +108,11 @@ func list(bmarks Bookmarks) {
 
 // Copies a string to the clipboard via xsel(1)
 func clipboard(input string) {
+
 	// xsel command
 	clipCmd := exec.Command(xselArgs[0], xselArgs[1:]...)
 
-	// pass the password to the standard input of xsel
+	// pass the input string to the standard input of xsel
 	clipCmd.Stdin = bytes.NewBuffer([]byte(input))
 
 	// run the command
@@ -136,11 +126,14 @@ func clipboard(input string) {
 
 // Returns a pointer to a Bookmark if it can be found within a list of bookmarks
 func getBmark(bmarks Bookmarks, user string, site string) (*Bookmark, error) {
+
+	// 
 	for _, bmark := range bmarks {
 		if bmark.Url == site && bmark.Username == user {
 			return &bmark, nil
 		}
 	}
+
 	return new(Bookmark), errors.New("bookmark could not be found")
 }
 
@@ -197,8 +190,14 @@ func main() {
 			log.Fatal(err)
 		}
 
-		// compute the password
-		password := getPass(bmark)
+		// user input's secret...
+		secret, err := inputSecret()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// generate the password from the given secret
+		password := genPassword(secret, bmark)
 
 		// copy the password to the clipboard
 		clipboard(password)
