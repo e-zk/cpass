@@ -1,2 +1,3 @@
-.*.swp	# vim swap files
-cpass	# binary
+CryptopassBookmarks.txt	# bookmarks file
+.*.swp			# vim swap files
+cpass			# binary
