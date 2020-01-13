@@ -24,7 +24,8 @@ const (
 	// path to xsel(1)
 	xselPath = "xsel"
 
-	enterPasswdPrompt = "secret: "
+	// password prompt
+	enterSecretPrompt = "secret (will not echo): "
 )
 
 var (
@@ -32,6 +33,7 @@ var (
 	xselArgs = []string{xselPath, "-i"}
 )
 
+// A bookmark is defined as follows in the JSON backup format...
 type Bookmark struct {
 	Url      string `json:"url"`
 	Username string `json:"username"`
@@ -41,6 +43,7 @@ type Bookmark struct {
 // Bookmarks is a list of type Bookmark
 type Bookmarks []Bookmark
 
+// Prints program usage information
 func usage() {
 	fmt.Printf("usage: %s <command> [<args>]\n\n", os.Args[0])
 	fmt.Printf("command can be one of:\n")
@@ -60,15 +63,23 @@ func genPassword(secret []byte, user string, site string) string {
 	return b64Encoded
 }
 
+// Get secret from user
+func inputSecret() (string, error) {
+	fmt.Printf(enterPasswdPrompt)
+	password, err := terminal.ReadPassword(int(os.Stdin.Fd()))
+	fmt.Printf("\n")
+	return password, err
+}
+
 // Generate and return a password using the given username, site and length
 func getPass(username string, site string, length int) string {
 
-	fmt.Printf(enterPasswdPrompt)
-	password, _ := terminal.ReadPassword(int(os.Stdin.Fd()))
-	fmt.Printf("\n")
+	password, err := inputSecret()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	encodedDk := genPassword(password, username, site)
-
 	return encodedDk[:length]
 }
 
@@ -154,11 +165,13 @@ func main() {
 	// argument parsing...
 	switch os.Args[1] {
 	case "help":
+		// print usage
 		usage()
 	case "ls":
 		// list bookmarks
 		list(bmarks)
 	case "find":
+		// filter the bookmarks, then list them
 		bmarks = filterList(bmarks, os.Args[2])
 		list(bmarks)
 	case "open":
