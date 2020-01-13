@@ -9,7 +9,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	//	"strconv"
+	//"strconv"
 	"errors"
 	"strings"
 
@@ -42,7 +42,7 @@ type Bookmark struct {
 type Bookmarks []Bookmark
 
 func usage() {
-	fmt.Printf("usage: cpass <command> [<args>]\n\n")
+	fmt.Printf("usage: %s <command> [<args>]\n\n", os.Args[0])
 	fmt.Printf("command can be one of:\n")
 	fmt.Printf("\thelp\t\t\tprint this help message\n")
 	fmt.Printf("\tls\t\t\tlist available bookmarks\n")
