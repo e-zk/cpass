@@ -18,14 +18,14 @@ import (
 )
 
 const (
-	// iterations
+	// pbkdf2 iterations
 	iterations = 5000
 
 	// path to xsel(1)
 	xselPath = "xsel"
 
 	// password prompt
-	enterSecretPrompt = "secret (will not echo): "
+	secretPrompt = "secret (will not echo): "
 )
 
 var (
@@ -53,34 +53,43 @@ func usage() {
 	fmt.Printf("\topen <user@site>\topen bookmark\n")
 }
 
-// Generate password from
-func genPassword(secret []byte, user string, site string) string {
+// Generate password from given secret, username, site URL, and cutoff length
+func genPassword(secret []byte, username string, site string, length int) string {
 
-	salt := fmt.Sprintf("%s@%s", user, site)
-	pbkdf2Hmac := pbkdf2.Key([]byte(secret), []byte(salt), 5000, 32, sha256.New)
+	// the salt is "user@site"
+	salt := fmt.Sprintf("%s@%s", username, site)
+
+	// generate the pbkdf2 key based on the input values
+	pbkdf2Hmac := pbkdf2.Key([]byte(secret), []byte(salt), iterations, 32, sha256.New)
+
+	// encode the resulting pbkdf2 key in base64
 	b64Encoded := base64.StdEncoding.EncodeToString([]byte(pbkdf2Hmac))
 
-	return b64Encoded
+	// cut the encoded key down to the given length; this is the final password
+	return b64Encoded[:length]
 }
 
 // Get secret from user
-func inputSecret() (string, error) {
-	fmt.Printf(enterPasswdPrompt)
-	password, err := terminal.ReadPassword(int(os.Stdin.Fd()))
+func inputSecret() ([]byte, error) {
+
+	// prompt for input
+	fmt.Printf(secretPrompt)
+
+	secret, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 	fmt.Printf("\n")
-	return password, err
+	return secret, err
 }
 
-// Generate and return a password using the given username, site and length
-func getPass(username string, site string, length int) string {
+// Return the password from the given bookmark
+func getPass(bmark *Bookmark) string {
 
-	password, err := inputSecret()
+	// user input's secret...
+	secret, err := inputSecret()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	encodedDk := genPassword(password, username, site)
-	return encodedDk[:length]
+	return genPassword(secret, bmark.Username, bmark.Url, bmark.Length)
 }
 
 // Filter a list of bookmarks, based on a keyword and return bookmarks which match this keyword
@@ -182,14 +191,14 @@ func main() {
 		user = full[0]
 		site = full[1]
 
-		//
+		// get pointer to Bookmark that matches the given user+site
 		bmark, err := getBmark(bmarks, user, site)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		// compute the password
-		password := getPass(bmark.Username, bmark.Url, bmark.Length)
+		password := getPass(bmark)
 
 		// copy the password to the clipboard
 		clipboard(password)
