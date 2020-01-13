@@ -15,16 +15,22 @@ after the the secret key is given, cpass will copy the password to the clipboard
 currently cpass only supports Unix-like systems (GNU/Linux, and \*BSD).
 
 # building
-run `make`.
+using the `make(1)` command:
+
+	$ make build
 
 cpass uses a POSIX makefile to ensure compatibility between both GNU make and BSD make.
 
 ## dependencies
-cpass depends on the [xsel(1)](http://www.vergenet.net/~conrad/software/xsel/ "xsel Homepage") command. install it using your package manager
+
+* crypto/pbkdf2:	[golang.org/x/crypto/pbkdf2](https://golang.org/x/crypto/pbkdf2)
+* crypto/ssh/terminal:	[golang.org/x/crypto/ssh/terminal](golang.org/x/crypto/ssh/terminal)
+
+cpass also depends on the [xsel(1)](http://www.vergenet.net/~conrad/software/xsel/ "xsel Homepage") command. install it using your package manager.
 
 # usage
 
-	usage: ./cpass <command> [<args>]
+	usage: cpass <command> [<args>]
 	
 	command can be one of:
 	help			print this help message
