@@ -58,6 +58,7 @@ filter bookmarks:
 	$ cpass find site.gov
 	test@site.gov (12)
 
+
 	$ cpass find person
 	person@www.google.com (18)
 
