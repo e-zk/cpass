@@ -24,7 +24,7 @@ cpass depends on the [xsel(1)](http://www.vergenet.net/~conrad/software/xsel/ "x
 `bookmarks` are password entries, they consist of: username, site URL and length. they are listed in the following format:
 
 	person@www.google.com (18)
-        |      |               L password length
+	|      |               L password length
 	|      L site URL      
 	L username
 
