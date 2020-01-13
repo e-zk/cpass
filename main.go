@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	//"flags"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -46,7 +46,10 @@ type Bookmarks []Bookmark
 
 // Prints program usage information
 func usage() {
-	fmt.Printf("usage: %s <command> [<args>]\n\n", os.Args[0])
+	fmt.Printf("usage: %s [-b <path>] <command> [<args>]\n\n", os.Args[0])
+	fmt.Printf("where:\n")
+	fmt.Printf("\t-b <path>\t\tpath to bookmarks file\n")
+	fmt.Printf("\n")
 	fmt.Printf("command can be one of:\n")
 	fmt.Printf("\thelp\t\t\tprint this help message\n")
 	fmt.Printf("\tls\t\t\tlist available bookmarks\n")
@@ -166,16 +169,28 @@ func loadBookmarks(bookmarksFile string) (bmarks Bookmarks, err error) {
 // Main program logic
 func main() {
 
-	const file = "CryptopassBookmarks.txt"
+	// file to open
+	var bookmarksFile string
+
+	// the default bookmarks file location is $HOME/.CryptopassBookmarks.txt:
+	defaultFile := fmt.Sprintf("%s/.CryptopassBookmarks.txt", os.Getenv("HOME"))
+
+	// flag to enable custom path to bookmarks file...
+	flag.StringVar(&bookmarksFile, "b", defaultFile, "bookmarks file")
+	flag.Usage = usage
+	flag.Parse()
 
 	// load the bookmarks file...
-	bmarks, err := loadBookmarks(file)
+	bmarks, err := loadBookmarks(bookmarksFile)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// argument parsing...
-	switch os.Args[1] {
+	// number of arguments remaining after flags are parsed
+	narg := len(os.Args) - flag.NArg()
+
+	// command parsing
+	switch os.Args[narg] {
 	case "help":
 		// print usage
 		usage()
@@ -184,13 +199,13 @@ func main() {
 		list(bmarks)
 	case "find":
 		// filter the bookmarks, then list them
-		bmarks = filterList(bmarks, os.Args[2])
+		bmarks = filterList(bmarks, os.Args[narg+1])
 		list(bmarks)
 	case "open":
 		var user, site string
 
 		// split the full password identifier (user@site) at '@'
-		full := strings.Split(os.Args[2], "@")
+		full := strings.Split(os.Args[narg+1], "@")
 		user = full[0]
 		site = full[1]
 
