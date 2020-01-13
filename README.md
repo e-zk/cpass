@@ -12,6 +12,8 @@ note: the PBKDF2 algorithm used uses SHA-256, 5000 iterations.
 
 after the the secret key is given, cpass will copy the password to the clipboard via the [xsel(1)](http://www.vergenet.net/~conrad/software/xsel/ "xsel Homepage") command.
 
+currently currently cpass only supports Unix-like systems (GNU/Linux, and \*BSD).
+
 # building
 run `make`.
 
@@ -24,9 +26,10 @@ cpass depends on the [xsel(1)](http://www.vergenet.net/~conrad/software/xsel/ "x
 `bookmarks` are password entries, they consist of: username, site URL and length. they are listed in the following format:
 
 	person@www.google.com (18)
-	|      |               L password length
-	|      L site URL      
-	L username
+	└┬───┘ └┬───────────┘  ├┘
+	 │      │              └ password length
+	 │      └ site URL
+	 └ username
 
 ## finding bookmarks
 list all available bookmarks:
