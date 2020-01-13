@@ -23,7 +23,16 @@ cpass uses a POSIX makefile to ensure compatibility between both GNU make and BS
 cpass depends on the [xsel(1)](http://www.vergenet.net/~conrad/software/xsel/ "xsel Homepage") command. install it using your package manager
 
 # usage
-`bookmarks` are password entries, they consist of: username, site URL and length. they are listed in the following format:
+
+	usage: ./cpass <command> [<args>]
+	
+	command can be one of:
+	help			print this help message
+	ls			list available bookmarks
+	find <string>		find a password containing <string>
+	open <user@site>	open a bookmark
+
+in cpass, *bookmarks* are password entries, they consist of: username, site URL and length. they are listed in the following format:
 
 	person@www.google.com (18)
 	└┬───┘ └┬───────────┘  ├┘
