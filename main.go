@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"io/ioutil"
 	"os/exec"
-	//"strconv"
 	"errors"
 	"strings"
 
@@ -137,31 +137,40 @@ func getBmark(bmarks Bookmarks, user string, site string) (*Bookmark, error) {
 	return new(Bookmark), errors.New("bookmark could not be found")
 }
 
+// Load bookmarks from a .JSON backup file
+func loadBookmarks(bookmarksFile string) (bmarks Bookmarks, err error) {
+
+	// open the file
+	jsonFile, err := os.Open(bookmarksFile)
+	if err != nil {
+		return bmarks, err
+	}
+	defer jsonFile.Close()
+
+	// convert the file to a byte array
+	jsonBytes, err := ioutil.ReadAll(jsonFile)
+	if err != nil {
+		return bmarks, err
+	}
+
+	// encode the JSON to the Bookmarks struct array
+	err = json.Unmarshal(jsonBytes, &bmarks)
+	if err != nil {
+		return bmarks, err
+	}
+
+	return bmarks, nil
+}
+
 // Main program logic
 func main() {
 
-	var bmarks Bookmarks
+	const file = "CryptopassBookmarks.txt"
 
-	testFileData := []byte(`
-			[
-				{
-					"url": "www.google.com",
-					"username": "person",
-					"length": 18
-				},
-				{
-					"url": "site.gov",
-					"username": "test",
-					"length": 12
-				}
-
-			]
-		`)
-
-	// encode the JSON to the Bookmarks struct array
-	jsonErr := json.Unmarshal(testFileData, &bmarks)
-	if jsonErr != nil {
-		log.Fatal(jsonErr)
+	// load the bookmarks file...
+	bmarks, err := loadBookmarks(file)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	// argument parsing...
