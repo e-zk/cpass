@@ -125,9 +125,16 @@ func clipboard(input string) {
 // Returns a pointer to a Bookmark if it can be found within a list of bookmarks
 func getBmark(bmarks Bookmarks, user string, site string) (*Bookmark, error) {
 
-	//
+	// for each bookmark in the given bmarks...
 	for _, bmark := range bmarks {
-		if bmark.Url == site && bmark.Username == user {
+
+		// the identifier is 'user@site'
+		id := fmt.Sprintf("%s@%s", user, site)
+		bmarkId := fmt.Sprintf("%s@%s", bmark.Username, bmark.Url)
+
+		// if the given id matches the current bookmark's,
+		// then return a pointer to it
+		if id == bmarkId {
 			return &bmark, nil
 		}
 	}
@@ -196,10 +203,14 @@ func main() {
 		bmarks = filterList(bmarks, os.Args[narg+1])
 		list(bmarks)
 	case "open":
-		// split the full password identifier (user@site) at '@'
-		full := strings.Split(os.Args[narg+1], "@")
-		user := full[0]
-		site := full[1]
+		// the bookmark given by the user
+		givenBmark := os.Args[narg+1]
+
+		// get the position of the last '@'
+		i := strings.LastIndex(givenBmark, "@")
+
+		user := givenBmark[:i] // user is everything before the last '@'
+		site := givenBmark[i:] // url is everything after the last '@'
 
 		// get pointer to Bookmark that matches the given user+site
 		bmark, err := getBmark(bmarks, user, site)
