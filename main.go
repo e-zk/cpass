@@ -85,8 +85,7 @@ func inputSecret() ([]byte, error) {
 }
 
 // Filter a list of bookmarks, based on a keyword and return bookmarks which match this keyword
-func filterList(bmarks Bookmarks, filter string) Bookmarks {
-	var outBmarks Bookmarks
+func filterList(bmarks Bookmarks, filter string) (outBmarks Bookmarks) {
 
 	// if the filter string is within the Username or URL
 	for _, bmark := range bmarks {
@@ -226,6 +225,8 @@ func main() {
 
 		// copy the password to the clipboard
 		clipboard(password)
-
+	default:
+		fmt.Printf("unknown command `%s'\n", os.Args[narg])
+		usage()
 	}
 }
