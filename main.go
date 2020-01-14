@@ -190,6 +190,12 @@ func main() {
 	// number of arguments remaining after flags are parsed
 	narg := len(os.Args) - flag.NArg()
 
+	if narg <= 1 {
+		fmt.Printf("insufficient arguments given\n")
+		usage()
+		return
+	}
+
 	// command parsing
 	switch os.Args[narg] {
 	case "help":
