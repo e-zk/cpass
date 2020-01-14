@@ -84,9 +84,9 @@ func filterList(bmarks Bookmarks, filter string) (outBmarks Bookmarks) {
 
 	// if the filter string is within the Username or URL
 	for _, bmark := range bmarks {
-		if strings.Contains(bmark.Username, filter) {
-			outBmarks = append(outBmarks, bmark)
-		} else if strings.Contains(bmark.Url, filter) {
+		fullname := fmt.Sprintf("%s@%s", bmark.Username, bmark.Url)
+		if strings.Contains(fullname, filter) {
+			// append the bookmark to outBmarks
 			outBmarks = append(outBmarks, bmark)
 		}
 	}
