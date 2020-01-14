@@ -1,7 +1,7 @@
 # cpass
 Simple password manager written in Go, based on the [CryptoPass Chrome extension](https://github.com/dchest/cryptopass/ "CryptoPass GitHub") and compatible with the [Android implementation](https://f-droid.org/en/packages/krasilnikov.alexey.cryptopass/ "CryptoPass Android F-Droid Page")'s JSON backup files.
 
-The basic principle is that your password is generated from a secret, and your username/site pair, then the resulting key is cut to the desired length:
+The basic principle is that your password is generated from a secret, and your username/site pair:
 
 	password = base64(pbkdf2(secret, username@url))[:length]
 
