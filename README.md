@@ -19,7 +19,7 @@ Using the `make(1)` command:
 	$ # build cpass binary
 	$ make build
 
-Note: A POSIX makefile to ensure compatibility between both GNU make and BSD make.
+Note: A POSIX makefile is used to ensure compatibility between both GNU and BSD systems.
 
 ### dependencies
 cpass depends on:
