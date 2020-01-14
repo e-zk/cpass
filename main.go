@@ -105,7 +105,7 @@ func list(bmarks Bookmarks) {
 }
 
 // Copies a string to the clipboard via xsel(1)
-func clipboard(input string) {
+func clipboard(input string) error {
 
 	// xsel command
 	clipCmd := exec.Command(xselArgs[0], xselArgs[1:]...)
@@ -116,10 +116,11 @@ func clipboard(input string) {
 	// run the command
 	err := clipCmd.Run()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	fmt.Printf("copied to clipboard.\n")
+	return nil
 }
 
 // Returns a pointer to a Bookmark if it can be found within a list of bookmarks
@@ -234,7 +235,10 @@ func main() {
 		password := genPassword(secret, bmark)
 
 		// copy the password to the clipboard
-		clipboard(password)
+		err = clipboard(password)
+		if err != nil {
+			log.Fatal(err)
+		}
 	default:
 		fmt.Printf("unknown command `%s'\n", os.Args[narg])
 		usage()
