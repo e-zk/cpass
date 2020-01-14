@@ -13,14 +13,14 @@ After the the secret key is given, cpass will copy the password to the clipboard
 
 Currently cpass only supports Unix-like systems (GNU/Linux, and \*BSD).
 
-# building
+## building
 Using the `make(1)` command:
 
 	$ make build
 
 cpass uses a POSIX makefile to ensure compatibility between both GNU make and BSD make.
 
-## dependencies
+### dependencies
 cpass depends on:
 
 * crypto/pbkdf2: [golang.org/x/crypto/pbkdf2](https://golang.org/x/crypto/pbkdf2)
@@ -30,7 +30,7 @@ You can install these dependencies by running `make deps`.
 
 cpass also depends on the [xsel(1)](http://www.vergenet.net/~conrad/software/xsel/ "xsel Homepage") command. You can install it using your package manager.
 
-# usage
+## usage
 
 	usage: ./cpass [-b <path>] <command> [<args>]
 	
@@ -51,7 +51,7 @@ In cpass, *bookmarks* are password entries, they consist of: username, site URL 
 	 │      └ site URL
 	 └ username
 
-## finding bookmarks
+### finding bookmarks
 To list all available bookmarks, simply run `cpass ls`:
 
 	$ cpass ls
@@ -68,7 +68,7 @@ cpass will also use the string to search through usernames:
 	$ cpass find person
 	person@www.google.com (18)
 
-## opening bookmarks
+### opening bookmarks
 
 	$ cpass open test@site.gov
 	secret:
