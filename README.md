@@ -14,6 +14,9 @@ Currently cpass only supports Unix-like systems (GNU/Linux, and \*BSD).
 ## building
 Using the `make(1)` command:
 
+	$ # install dependencies (optional)
+	$ make deps
+	$ # build cpass binary
 	$ make build
 
 Note: A POSIX makefile to ensure compatibility between both GNU make and BSD make.
