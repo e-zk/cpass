@@ -239,4 +239,6 @@ func main() {
 		fmt.Printf("unknown command `%s'\n", os.Args[narg])
 		usage()
 	}
+
+	return
 }
