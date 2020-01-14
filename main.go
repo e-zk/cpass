@@ -19,19 +19,13 @@ import (
 )
 
 const (
-	// pbkdf2 iterations
-	iterations = 5000
-
-	// path to xsel(1)
-	xselPath = "xsel"
-
-	// password prompt
-	secretPrompt = "secret (will not echo): "
+	iterations   = 5000                       // pbkdf2 iterations
+	xselPath     = "xsel"                     // path to xsel(1)
+	secretPrompt = "secret (will not echo): " // secret prompt
 )
 
 var (
-	// xsel arguments
-	xselArgs = []string{xselPath, "-i"}
+	xselArgs = []string{xselPath, "-i"} // xel(1) arguments
 )
 
 // A bookmark is defined as follows in the JSON backup format...
@@ -46,6 +40,7 @@ type Bookmarks []Bookmark
 
 // Prints program usage information
 func usage() {
+
 	fmt.Printf("usage: %s [-b <path>] <command> [<args>]\n\n", os.Args[0])
 	fmt.Printf("where:\n")
 	fmt.Printf("\t-b <path>\t\tpath to bookmarks file\n")
