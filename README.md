@@ -1,21 +1,20 @@
-# cpass
-simple password manager written in Go.
-based on the [CryptoPass Chrome extension](https://github.com/dchest/cryptopass/ "CryptoPass GitHub") and compatible with the [Android implementation](https://f-droid.org/en/packages/krasilnikov.alexey.cryptopass/ "CryptoPass Android F-Droid Page")'s JSON backup files.
+# cpasssimple password manager written in Go.
+Based on the [CryptoPass Chrome extension](https://github.com/dchest/cryptopass/ "CryptoPass GitHub") and compatible with the [Android implementation](https://f-droid.org/en/packages/krasilnikov.alexey.cryptopass/ "CryptoPass Android F-Droid Page")'s JSON backup files.
 
-the basic principle is that your password is generated from a secret, and your username/site pair:
+The basic principle is that your password is generated from a secret, and your username/site pair:
 
 	password = base64(pbkdf2(secret, username@url))
 
-the password is then cut to the desired length.
+The password is then cut to the desired length.
 
-note: the PBKDF2 algorithm used uses SHA-256, 5000 iterations.
+Note: the PBKDF2 algorithm used uses SHA-256, 5000 iterations.
 
-after the the secret key is given, cpass will copy the password to the clipboard via the [xsel(1)](http://www.vergenet.net/~conrad/software/xsel/ "xsel Homepage") command.
+After the the secret key is given, cpass will copy the password to the clipboard via the [xsel(1)](http://www.vergenet.net/~conrad/software/xsel/ "xsel Homepage") command.
 
-currently cpass only supports Unix-like systems (GNU/Linux, and \*BSD).
+Currently cpass only supports Unix-like systems (GNU/Linux, and \*BSD).
 
 # building
-using the `make(1)` command:
+Using the `make(1)` command:
 
 	$ make build
 
@@ -27,9 +26,9 @@ cpass depends on:
 * crypto/pbkdf2: [golang.org/x/crypto/pbkdf2](https://golang.org/x/crypto/pbkdf2)
 * crypto/ssh/terminal: [golang.org/x/crypto/ssh/terminal](golang.org/x/crypto/ssh/terminal)
 
-you can install these dependencies by running `make deps`.
+You can install these dependencies by running `make deps`.
 
-cpass also depends on the [xsel(1)](http://www.vergenet.net/~conrad/software/xsel/ "xsel Homepage") command. you can install it using your package manager.
+cpass also depends on the [xsel(1)](http://www.vergenet.net/~conrad/software/xsel/ "xsel Homepage") command. You can install it using your package manager.
 
 # usage
 
@@ -44,7 +43,7 @@ cpass also depends on the [xsel(1)](http://www.vergenet.net/~conrad/software/xse
 		find <string>		find a password containing <string>
 		open <user@site>	open bookmark
 
-in cpass, *bookmarks* are password entries, they consist of: username, site URL and length. they are listed in the following format:
+In cpass, *bookmarks* are password entries, they consist of: username, site URL and length. they are listed in the following format:
 
 	person@www.google.com (18)
 	└┬───┘ └┬───────────┘  ├┘
@@ -53,13 +52,13 @@ in cpass, *bookmarks* are password entries, they consist of: username, site URL 
 	 └ username
 
 ## finding bookmarks
-to list all available bookmarks, simply run `cpass ls`:
+To list all available bookmarks, simply run `cpass ls`:
 
 	$ cpass ls
 	person@www.google.com (18)
 	test@site.gov (12)
 
-to find passwords containing a specific string; run `cpass find <string>`:
+To find passwords containing a specific string; run `cpass find <string>`:
 
 	$ cpass find site.gov
 	test@site.gov (12)
