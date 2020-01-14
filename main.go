@@ -215,8 +215,10 @@ func main() {
 		// get the position of the last '@'
 		i := strings.LastIndex(givenBmark, "@")
 
-		user := givenBmark[:i] // user is everything before the last '@'
-		site := givenBmark[i:] // url is everything after the last '@'
+		user := givenBmark[:i]   // user is everything before the last '@'
+		site := givenBmark[i+1:] // url is everything after the last '@' (not including it)
+
+		fmt.Printf("user:%s\nsite:%s\n", user, site)
 
 		// get pointer to Bookmark that matches the given user+site
 		bmark, err := getBmark(bmarks, user, site)
