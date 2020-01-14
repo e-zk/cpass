@@ -196,12 +196,10 @@ func main() {
 		bmarks = filterList(bmarks, os.Args[narg+1])
 		list(bmarks)
 	case "open":
-		var user, site string
-
 		// split the full password identifier (user@site) at '@'
 		full := strings.Split(os.Args[narg+1], "@")
-		user = full[0]
-		site = full[1]
+		user := full[0]
+		site := full[1]
 
 		// get pointer to Bookmark that matches the given user+site
 		bmark, err := getBmark(bmarks, user, site)
