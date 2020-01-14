@@ -1,15 +1,13 @@
 # cpass
 Simple password manager written in Go, based on the [CryptoPass Chrome extension](https://github.com/dchest/cryptopass/ "CryptoPass GitHub") and compatible with the [Android implementation](https://f-droid.org/en/packages/krasilnikov.alexey.cryptopass/ "CryptoPass Android F-Droid Page")'s JSON backup files.
 
-The basic principle is that your password is generated from a secret, and your username/site pair:
+The basic principle is that your password is generated from a secret, and your username/site pair, then the resulting key is cut to the desired length:
 
-	password = base64(pbkdf2(secret, username@url))
+	password = base64(pbkdf2(secret, username@url))[:length]
 
-The password is then cut to the desired length.
+Note: The PBKDF2 algorithm used in cpass uses SHA-256, 5000 iterations.
 
-Note: the PBKDF2 algorithm used uses SHA-256, 5000 iterations.
-
-After the the secret key is given, cpass will copy the password to the clipboard via the [xsel(1)](http://www.vergenet.net/~conrad/software/xsel/ "xsel Homepage") command.
+After the the secret key is given, cpass will copy the resulting pbkdf2 key (your password) to the clipboard via the [xsel(1)](http://www.vergenet.net/~conrad/software/xsel/ "xsel Homepage") command.
 
 Currently cpass only supports Unix-like systems (GNU/Linux, and \*BSD).
 
@@ -18,7 +16,7 @@ Using the `make(1)` command:
 
 	$ make build
 
-cpass uses a POSIX makefile to ensure compatibility between both GNU make and BSD make.
+Note: A POSIX makefile to ensure compatibility between both GNU make and BSD make.
 
 ### dependencies
 cpass depends on:
@@ -71,5 +69,5 @@ cpass will also use the string to search through usernames:
 ### opening bookmarks
 
 	$ cpass open test@site.gov
-	secret:
+	secret (will not echo):
 	copied to clipboard.
