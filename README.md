@@ -44,13 +44,30 @@ cpass also depends on the [xsel(1)](http://www.vergenet.net/~conrad/software/xse
 		find <string>		find a password containing <string>
 		open <user@site>	open bookmark
 
-In cpass, *bookmarks* are password entries, they consist of: username, site URL and length. they are listed in the following format:
+In cpass, _bookmarks_ are essentially account entries. Bookmarks consist of: a username, a site URL, and the length of the password. Bookmarks are listed in the following format:
 
 	person@www.google.com (18)
 	└┬───┘ └┬───────────┘  ├┘
 	 │      │              └ password length
 	 │      └ site URL
 	 └ username
+
+A "bookmarks file" is a JSON file that holds a collection of bookmarks. An example bookmarks file, containing two bookmarks, would look like this:
+
+	[
+		{
+			"url": "www.google.com",
+			"username": "person",
+			"length": 18
+		},
+		{
+			"url": "site.gov",
+			"username": "test",
+			"length": 12
+		}
+	]
+
+A user's primary bookmarks file is located at `$HOME/.CryptopassBookmarks.txt`. If a different bookmarks file is to be parsed, the path to it can be specified with the `-b` flag.
 
 ### finding bookmarks
 To list all available bookmarks, simply run `cpass ls`:
@@ -70,6 +87,7 @@ cpass will also use the string to search through usernames:
 	person@www.google.com (18)
 
 ### opening bookmarks
+To open a bookmark, simply supply cpass with your account in the 'username@site' format:
 
 	$ cpass open test@site.gov
 	secret (will not echo):
