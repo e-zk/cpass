@@ -14,6 +14,7 @@ import (
 	"os/exec"
 	"strings"
 
+	// external dependencies...
 	"golang.org/x/crypto/pbkdf2"
 	"golang.org/x/crypto/ssh/terminal"
 )
@@ -21,11 +22,11 @@ import (
 const (
 	iterations   = 5000                       // pbkdf2 iterations
 	xselPath     = "xsel"                     // path to xsel(1)
-	secretPrompt = "secret (will not echo): " // secret prompt
+	secretPrompt = "secret (will not echo): " // prompt for secret
 )
 
 var (
-	xselArgs = []string{xselPath, "-i"} // xel(1) arguments
+	xselArgs = []string{xselPath, "-i"} // xsel(1) arguments
 )
 
 // A bookmark is defined as follows in the JSON backup format...
@@ -74,8 +75,11 @@ func inputSecret() ([]byte, error) {
 	// prompt for input
 	fmt.Printf(secretPrompt)
 
+	// use terminal API to read user password without echoing
 	secret, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 	fmt.Printf("\n")
+
+	// return the user's secret
 	return secret, err
 }
 
@@ -179,8 +183,8 @@ func main() {
 
 	// flag to enable custom path to bookmarks file...
 	flag.StringVar(&bookmarksFile, "b", defaultFile, "bookmarks file")
-	flag.Usage = usage
-	flag.Parse()
+	flag.Usage = usage // enable custom usage function
+	flag.Parse()       // parse flags
 
 	// load the bookmarks file...
 	bmarks, err := loadBookmarks(bookmarksFile)
@@ -191,6 +195,8 @@ func main() {
 	// number of arguments remaining after flags are parsed
 	narg := len(os.Args) - flag.NArg()
 
+	// if the number of arguments remaining are less than one, fail and return
+	// usage information
 	if narg < 1 {
 		fmt.Printf("insufficient arguments given\n")
 		usage()
@@ -240,6 +246,7 @@ func main() {
 			log.Fatal(err)
 		}
 	default:
+		// if any other command is given, show an error message and usage information
 		fmt.Printf("unknown command `%s'\n", os.Args[narg])
 		usage()
 	}
