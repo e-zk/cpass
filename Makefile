@@ -2,11 +2,7 @@
 .POSIX:
 .SUFFIXES:
 
-# macros
-BIN = cpass
-GOCMD = go
-GOBUILD = $(GOCMD) build
-GOGET = $(GOCMD) get
+.include <config.mk>
 
 # by default, build
 all: build
@@ -19,6 +15,12 @@ build:
 deps:
 	$(GOGET) golang.org/x/crypto/pbkdf2
 	$(GOGET) golang.org/x/crypto/ssh/terminal
+
+# install
+install:build
+	[ -f $(INSTALLPATH) ] && rm -i $(INSTALLPATH)
+	cp -v $(BIN) $(INSTALLPATH)
+	chmod 2555 $(INSTALLPATH)
 
 # clean up
 clean:
