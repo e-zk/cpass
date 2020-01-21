@@ -175,6 +175,13 @@ func loadBookmarks(bookmarksFile string) (bmarks Bookmarks, err error) {
 // Main program logic
 func main() {
 
+	// test if arguments are insufficient...
+	if len(os.Args) == 1 {
+		fmt.Printf("insufficient arguments given\n")
+		usage()
+		return
+	}
+
 	// file to open
 	var bookmarksFile string
 
