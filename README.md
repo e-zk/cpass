@@ -5,9 +5,9 @@ The basic principle is that your password is generated from a secret, and your u
 
 	password = base64(pbkdf2(secret, username@url))[:length]
 
-Note: The PBKDF2 algorithm used in cpass uses SHA-256, 5000 iterations.
+Note: The PBKDF2 algorithm used in cpass uses SHA-256, 5000 iterations in order to be backwards compatible with both the extention and the Android application.
 
-After the the secret key is given, cpass will copy the resulting pbkdf2 key (your password) to the clipboard via the [xsel(1)](http://www.vergenet.net/~conrad/software/xsel/ "xsel Homepage") command.
+After the the secret key is given, cpass will copy the resulting pbkdf2 key (your password) to the clipboard via the [`xsel(1)`](http://www.vergenet.net/~conrad/software/xsel/ "xsel Homepage") command.
 
 Currently cpass only supports Unix-like systems (GNU/Linux, and \*BSD).
 
@@ -29,7 +29,7 @@ cpass depends on:
 
 You can install these dependencies by running `make deps`.
 
-cpass also depends on the [xsel(1)](http://www.vergenet.net/~conrad/software/xsel/ "xsel Homepage") command. You can install it using your package manager.
+cpass also depends on the [`xsel(1)`](http://www.vergenet.net/~conrad/software/xsel/ "xsel Homepage") command. You can install it using your package manager.
 
 ## usage
 
@@ -44,7 +44,7 @@ cpass also depends on the [xsel(1)](http://www.vergenet.net/~conrad/software/xse
 		find <string>		find a password containing <string>
 		open <user@site>	open bookmark
 
-In cpass, _bookmarks_ are essentially account entries. Bookmarks consist of: a username, a site URL, and the length of the password. Bookmarks are listed in the following format:
+In cpass, _bookmarks_ are account entries. A bookmark consists of: a username, a site URL, and the length of the password. Bookmarks are listed in the following format:
 
 	person@www.google.com (18)
 	└┬───┘ └┬───────────┘  ├┘
@@ -86,9 +86,16 @@ cpass will also use the string to search through usernames:
 	$ cpass find person
 	person@www.google.com (18)
 
+If you wish, the output of `cpass ls` can be piped into other programs, such as `grep(1)`:
+
+	$ cpass ls | grep -E '.+\.gov'
+	test@site.gov (12)'
+
+Note: Built-in regex support is coming soon(TM).
+
 ### opening bookmarks
 To open a bookmark, simply supply cpass with your account in the 'username@site' format:
 
 	$ cpass open test@site.gov
-	secret (will not echo):
+	secret (will not echo): 
 	copied to clipboard.
