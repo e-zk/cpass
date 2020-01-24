@@ -1,11 +1,11 @@
 # cpass
 Simple password manager written in Go, based on the [CryptoPass Chrome extension](https://github.com/dchest/cryptopass/ "CryptoPass GitHub") and compatible with the [Android implementation](https://f-droid.org/en/packages/krasilnikov.alexey.cryptopass/ "CryptoPass Android F-Droid Page")'s JSON backup files.
 
-The basic principle is that your password is generated from a secret, and your username/site pair:
+The basic principle is that your password is generated from a username@site pair, and a  secret ("master" password):
 
 	password = base64(pbkdf2(secret, username@url))[:length]
 
-Note: The PBKDF2 algorithm used in cpass uses SHA-256, 5000 iterations in order to be backwards compatible with both the extention and the Android application.
+Note: The PBKDF2 algorithm used in `cpass` uses SHA-256 and 5000 iterations in order to be backwards compatible with both the Chrome extention and the Android application.
 
 After the the secret key is given, cpass will copy the resulting pbkdf2 key (your password) to the clipboard via the [`xsel(1)`](http://www.vergenet.net/~conrad/software/xsel/ "xsel Homepage") command.
 
@@ -52,7 +52,7 @@ In cpass, _bookmarks_ are account entries. A bookmark consists of: a username, a
 	 │      └ site URL
 	 └ username
 
-A "bookmarks file" is a JSON file that holds a collection of bookmarks. An example bookmarks file, containing two bookmarks, would look like this:
+A "bookmarks file" is a simple JSON file that holds a collection of bookmarks. An example bookmarks file, containing two bookmarks, would look like this:
 
 	[
 		{
@@ -81,17 +81,15 @@ To find passwords containing a specific string; run `cpass find <string>`:
 	$ cpass find site.gov
 	test@site.gov (12)
 
-cpass will also use the string to search through usernames:
+Note: `cpass find <string>` tries to match the given string iwhtin the whole bookmark identifier ('username@site'). So, using an entire or partial bookmark identifier works:
 
-	$ cpass find person
+	$ cpass find son@wwww.google
 	person@www.google.com (18)
 
 If you wish, the output of `cpass ls` can be piped into other programs, such as `grep(1)`:
 
 	$ cpass ls | grep -E '.+\.gov'
 	test@site.gov (12)'
-
-Note: Built-in regex support is coming soon(TM).
 
 ### opening bookmarks
 To open a bookmark, simply supply cpass with your account in the 'username@site' format:
