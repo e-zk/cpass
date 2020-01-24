@@ -193,12 +193,6 @@ func main() {
 	flag.Usage = usage // enable custom usage function
 	flag.Parse()       // parse flags
 
-	// load the bookmarks file...
-	bmarks, err := loadBookmarks(bookmarksFile)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	// number of arguments remaining after flags are parsed
 	narg := len(os.Args) - flag.NArg()
 
@@ -208,6 +202,13 @@ func main() {
 		fmt.Printf("insufficient arguments given\n")
 		usage()
 		return
+	}
+
+	// load the bookmarks file...
+	bmarks, err := loadBookmarks(bookmarksFile)
+	if err != nil {
+		log.Println(err)
+		panic(err)
 	}
 
 	// command parsing
