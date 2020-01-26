@@ -81,7 +81,7 @@ To find passwords containing a specific string; run `cpass find <string>`:
 	$ cpass find site.gov
 	test@site.gov (12)
 
-Note: `cpass find <string>` tries to match the given string iwhtin the whole bookmark identifier ('username@site'). So, using an entire or partial bookmark identifier works:
+Note: `cpass find <string>` tries to match the given string within the whole bookmark identifier ('username@site'). So, using an entire or partial bookmark identifier works:
 
 	$ cpass find son@wwww.google
 	person@www.google.com (18)
