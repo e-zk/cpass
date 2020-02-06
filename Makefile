@@ -2,7 +2,7 @@
 .POSIX:
 .SUFFIXES:
 
-.include <config.mk>
+include config.mk
 
 # by default, build
 all: build
