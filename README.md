@@ -14,10 +14,10 @@ Currently cpass only supports Unix-like systems (GNU/Linux, and \*BSD).
 ## building
 Using the `make(1)` command:
 
-	# install dependencies (optional)
+	# install dependencies (optional):
 	make deps
 	
-	# build cpass binary
+	# build cpass binary:
 	make build
 
 Note: A POSIX makefile is used to ensure compatibility between both GNU and BSD systems.
@@ -35,8 +35,8 @@ cpass also depends on the [`xsel(1)`](http://www.vergenet.net/~conrad/software/x
 ### installing
 First open `config.mk` to confirm install location. By default cpass is installed to /usr/local/bin; you will need to run `make install` as root:
 
-	# obtain root shell via doas(1) or sudo(1)
-	# install cpass to /usr/local
+	# first obtain root shell via doas(1) or sudo(1)...
+	# install cpass to /usr/local:
 	make install
 
 ## usage
