@@ -214,10 +214,8 @@ func main() {
 	// command parsing
 	switch os.Args[narg] {
 	case "help":
-		// print usage
 		usage()
 	case "ls":
-		// list bookmarks
 		list(bmarks)
 	case "find":
 		// filter the bookmarks, then list them
