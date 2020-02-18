@@ -4,7 +4,7 @@
 
 include config.mk
 
-# by default, build
+# by default, build
 all: build
 
 # build the binary
@@ -20,7 +20,7 @@ deps:
 install:build
 	[ -f $(INSTALLPATH) ] && rm -i $(INSTALLPATH)
 	cp -v $(BIN) $(INSTALLPATH)
-	chmod 2555 $(INSTALLPATH)
+	chmod +x $(INSTALLPATH)
 
 # clean up
 clean:
