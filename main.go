@@ -43,16 +43,16 @@ type Bookmarks []Bookmark
 // Prints program usage information
 func usage() {
 
-	fmt.Printf("usage: %s [-p] [-b <path>] <command> [<args>]\n\n", os.Args[0])
+	fmt.Printf("usage: %s [-p] [-b path] command [args]\n\n", os.Args[0])
 	fmt.Printf("where:\n")
-	fmt.Printf("\t-b <path>\t\tpath to bookmarks file\n")
+	fmt.Printf("\t-b path\t\tpath to bookmarks file\n")
 	fmt.Printf("\t-p\t\tprint the password to stdout instead of piping to xsel\n")
 	fmt.Printf("\n")
 	fmt.Printf("valid commands:\n")
 	fmt.Printf("\thelp\t\t\tprint this help message\n")
 	fmt.Printf("\tls\t\t\tlist available bookmarks\n")
-	fmt.Printf("\tfind <string>\t\tfind a password containing <string>\n")
-	fmt.Printf("\topen <user@site>\topen bookmark\n")
+	fmt.Printf("\tfind 'string'\t\tsearch for a password containing a string\n")
+	fmt.Printf("\topen user@site\topen bookmark with id 'user@site'\n")
 }
 
 // Generate password from given secret, and Bookmark
