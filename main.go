@@ -20,8 +20,9 @@ import (
 )
 
 const (
-	iterations   = 5000                       // pbkdf2 iterations
-	xselPath     = "xsel"                     // path to xsel(1)
+	iterations   = 5000   // pbkdf2 iterations
+	xselPath     = "xsel" // path to xsel(1)
+	printWarn    = "WARNING: will print password to stdout"
 	secretPrompt = "secret (will not echo): " // prompt for secret
 )
 
@@ -45,8 +46,9 @@ func usage() {
 	fmt.Printf("usage: %s [-b <path>] <command> [<args>]\n\n", os.Args[0])
 	fmt.Printf("where:\n")
 	fmt.Printf("\t-b <path>\t\tpath to bookmarks file\n")
+	fmt.Printf("\t-s <path>\t\tprint the password to stdout instead of piping to xsel\n")
 	fmt.Printf("\n")
-	fmt.Printf("command can be one of:\n")
+	fmt.Printf("valid commands:\n")
 	fmt.Printf("\thelp\t\t\tprint this help message\n")
 	fmt.Printf("\tls\t\t\tlist available bookmarks\n")
 	fmt.Printf("\tfind <string>\t\tfind a password containing <string>\n")
@@ -184,12 +186,17 @@ func main() {
 
 	// file to open
 	var bookmarksFile string
+	var printPasswd bool
 
 	// the default bookmarks file location is $HOME/.CryptopassBookmarks.txt:
 	defaultFile := fmt.Sprintf("%s/.CryptopassBookmarks.txt", os.Getenv("HOME"))
 
+	//
+	defaultPrint := false
+
 	// flag to enable custom path to bookmarks file...
 	flag.StringVar(&bookmarksFile, "b", defaultFile, "bookmarks file")
+	flag.BoolVar(&printPasswd, "p", defaultPrint, "print password to stdout, instead of passing it to xclip")
 	flag.Usage = usage // enable custom usage function
 	flag.Parse()       // parse flags
 
@@ -246,10 +253,14 @@ func main() {
 		// generate the password from the given secret
 		password := genPassword(secret, bmark)
 
-		// copy the password to the clipboard
-		err = clipboard(password)
-		if err != nil {
-			log.Fatal(err)
+		if printPasswd {
+			fmt.Printf("%s\n", password)
+		} else {
+			// copy the password to the clipboard
+			err = clipboard(password)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	default:
 		// if any other command is given, show an error message and usage information
