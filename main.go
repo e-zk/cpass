@@ -22,7 +22,7 @@ import (
 const (
 	iterations   = 5000   // pbkdf2 iterations
 	xselPath     = "xsel" // path to xsel(1)
-	printWarn    = "WARNING: will print password to stdout"
+	printWarn    = "WARNING: will print password to stdout\n"
 	secretPrompt = "secret (will not echo): " // prompt for secret
 )
 
@@ -43,10 +43,10 @@ type Bookmarks []Bookmark
 // Prints program usage information
 func usage() {
 
-	fmt.Printf("usage: %s [-b <path>] <command> [<args>]\n\n", os.Args[0])
+	fmt.Printf("usage: %s [-p] [-b <path>] <command> [<args>]\n\n", os.Args[0])
 	fmt.Printf("where:\n")
 	fmt.Printf("\t-b <path>\t\tpath to bookmarks file\n")
-	fmt.Printf("\t-s <path>\t\tprint the password to stdout instead of piping to xsel\n")
+	fmt.Printf("\t-p\t\tprint the password to stdout instead of piping to xsel\n")
 	fmt.Printf("\n")
 	fmt.Printf("valid commands:\n")
 	fmt.Printf("\thelp\t\t\tprint this help message\n")
@@ -229,6 +229,12 @@ func main() {
 		bmarks = filterList(bmarks, os.Args[narg+1])
 		list(bmarks)
 	case "open":
+
+		// print warning message if applicable
+		if printPasswd {
+			fmt.Printf(printWarn)
+		}
+
 		// the bookmark given by the user
 		givenBmark := os.Args[narg+1]
 
@@ -253,6 +259,8 @@ func main() {
 		// generate the password from the given secret
 		password := genPassword(secret, bmark)
 
+		// print the password to stdout if -s is set;
+		// if not set, then copy the password to the clipboard via xsel
 		if printPasswd {
 			fmt.Printf("%s\n", password)
 		} else {
