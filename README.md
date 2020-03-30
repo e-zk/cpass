@@ -9,7 +9,7 @@ Note: The PBKDF2 algorithm used in `cpass` uses SHA-256 and 5000 iterations in o
 
 After the the secret key is given, cpass will copy the resulting pbkdf2 key (your password) to the clipboard via the [`xsel(1)`](http://www.vergenet.net/~conrad/software/xsel/ "xsel Homepage") command.
 
-Currently cpass only supports Unix-like systems (GNU/Linux, and \*BSD).
+Currently cpass only supports Unix-like systems (GNU/Linux, and \*BSD). (You can use the -p flag to print the password in plain text to stdout, this should work on all unix-like environments, including WSL on Windows).
 
 ## building
 Using the `make(1)` command:
@@ -44,16 +44,17 @@ Installation location can also be changed through make flags:
 
 ## usage
 
-	usage: ./cpass [-b <path>] <command> [<args>]
+	usage: ./cpass [-p] [-b path] command [args]
 	
 	where:
-		-b <path>		path to bookmarks file
+	        -b <path>               path to bookmarks file
+	        -p                      print password to stdout instead of piping to xsel
 	
 	command can be one of:
-		help			print this help message
-		ls			list available bookmarks
-		find <string>		find a password containing <string>
-		open <user@site>	open bookmark
+	        help                    print this help message
+	        ls                      list available bookmarks
+	        find <string>           find a password containing <string>
+	        open <user@site>        open bookmark
 
 In cpass, _bookmarks_ are account entries. A bookmark consists of: a username, a site URL, and the length of the password. Bookmarks are listed in the following format:
 
