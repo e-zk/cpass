@@ -117,7 +117,7 @@ func list(bmarks Bookmarks) {
 func isWSL() bool {
 	ret := false
 	if runtime.GOOS == "linux" {
-		verBytes, err := ioutil.ReadFile("/proc/sys/kernel/osrelease")
+		verBytes, err := ioutil.ReadFile(osReleasePath)
 		if err != nil {
 			log.Fatal(err)
 		}
