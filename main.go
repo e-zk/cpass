@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"runtime"
 
 	// external dependencies...
 	"golang.org/x/crypto/pbkdf2"
@@ -20,10 +21,12 @@ import (
 )
 
 const (
-	iterations   = 5000   // pbkdf2 iterations
-	xselPath     = "xsel" // path to xsel(1)
-	printWarn    = "WARNING: will print password to stdout\n"
-	secretPrompt = "secret (will not echo): " // prompt for secret
+	iterations    = 5000   // pbkdf2 iterations
+	xselPath      = "xsel" // path to xsel(1)
+	clipPath      = "/mnt/c/Windows/system32/clip.exe" // windows clip.exe path
+	osReleasePath = "/proc/sys/kernel/osrelease"
+	printWarn     = "WARNING: will print password to stdout\n"
+	secretPrompt  = "secret (will not echo): " // prompt for secret
 )
 
 var (
@@ -110,13 +113,34 @@ func list(bmarks Bookmarks) {
 	}
 }
 
+// Checks if we are running on WSL
+func isWSL() bool {
+	ret := false
+	if runtime.GOOS == "linux" {
+		verBytes, err := ioutil.ReadFile("/proc/sys/kernel/osrelease")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		ret = strings.HasSuffix(string(verBytes), "Microsoft\n")
+	}
+	return ret
+}
+
 // Copies a string to the clipboard via xsel(1)
 func clipboard(input string) error {
 
-	// xsel command
-	clipCmd := exec.Command(xselArgs[0], xselArgs[1:]...)
+	var clipCmd *exec.Cmd
 
-	// pass the input string to the standard input of xsel
+	// if we are running on WSL, use windows' clip.exe
+	if isWSL() {
+		clipCmd = exec.Command(clipPath)
+	} else {
+		// xsel command
+		clipCmd = exec.Command(xselArgs[0], xselArgs[1:]...)
+	}
+
+	// pass the input string to the standard input of the clipboard command
 	clipCmd.Stdin = bytes.NewBuffer([]byte(input))
 
 	// run the command
