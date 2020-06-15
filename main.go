@@ -144,7 +144,7 @@ func clipboard(input string) error {
 	var clipCmd *exec.Cmd
 
 	// if we are running on WSL or Windows, use windows' clip.exe
-	if getOS == "WSL" || getOS == "windows" {
+	if getOS() == "WSL" || getOS() == "windows" {
 		clipCmd = exec.Command(clipPath)
 	} else {
 		// xsel command
