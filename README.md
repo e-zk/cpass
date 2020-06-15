@@ -9,13 +9,21 @@ Note: The PBKDF2 algorithm used in `cpass` uses SHA-256 and 5000 iterations in o
 
 After the the secret key is given, cpass will copy the resulting pbkdf2 key (your password) to the clipboard via the [`xsel(1)`](http://www.vergenet.net/~conrad/software/xsel/ "xsel Homepage") command.
 
-Currently cpass only supports Unix-like systems (GNU/Linux, and \*BSD). (You can use the -p flag to print the password in plain text to stdout, this should work on all unix-like environments, including WSL on Windows).
+`cpass` works on Unix-like systems (Linux, *BSD) and also Windows and WSL.
 
 ## usage
 
-	synopsis: cpass [-p] [-b path] [help|ls|find|open] [args]
+	cpass [-p] [-b path] [help|ls|find|open] [args]
 
-In cpass, _bookmarks_ are account entries. A bookmark consists of: a username, a site URL, and the length of the password. Bookmarks are listed in the following format:
+### finding bookmarks
+In cpass, _bookmarks_ are account entries. A bookmark consists of: a username, a site URL, and the length of the password.  
+To list all available bookmarks, simply run `cpass ls`:
+
+	$ cpass ls
+	person@www.google.com (18)
+	test@site.gov (12)
+
+Bookmarks are listed in the following format:
 
 	person@www.google.com (18)
 	└┬───┘ └┬───────────┘  ├┘
@@ -23,6 +31,29 @@ In cpass, _bookmarks_ are account entries. A bookmark consists of: a username, a
 	 │      └ site URL
 	 └ username
 
+To find passwords containing a specific string; run `cpass find <string>`:
+
+	$ cpass find site.gov
+	test@site.gov (12)
+
+The `find` command tries to match the given string within the whole bookmark identifier ('username@site'). So, using an entire or partial bookmark identifier works:
+
+	$ cpass find son@wwww.google
+	person@www.google.com (18)
+
+If you wish, the output of `cpass ls` can be piped into other programs, such as `grep(1)`:
+
+	$ cpass ls | grep -E '.+\.gov'
+	test@site.gov (12)'
+
+### opening bookmarks
+To open a bookmark supply cpass with your account in the 'username@site' format:
+
+	$ cpass open test@site.gov
+	secret (will not echo): 
+	copied to clipboard.
+
+### file format
 A "bookmarks file" is a simple JSON file that holds a collection of bookmarks. An example bookmarks file, containing two bookmarks, would look like this:
 
 	[
@@ -38,36 +69,7 @@ A "bookmarks file" is a simple JSON file that holds a collection of bookmarks. A
 		}
 	]
 
-A user's primary bookmarks file is located at `$HOME/.CryptopassBookmarks.txt`. If a different bookmarks file is to be parsed, the path to it can be specified with the `-b` flag.
-
-### finding bookmarks
-To list all available bookmarks, simply run `cpass ls`:
-
-	$ cpass ls
-	person@www.google.com (18)
-	test@site.gov (12)
-
-To find passwords containing a specific string; run `cpass find <string>`:
-
-	$ cpass find site.gov
-	test@site.gov (12)
-
-Note: `cpass find <string>` tries to match the given string within the whole bookmark identifier ('username@site'). So, using an entire or partial bookmark identifier works:
-
-	$ cpass find son@wwww.google
-	person@www.google.com (18)
-
-If you wish, the output of `cpass ls` can be piped into other programs, such as `grep(1)`:
-
-	$ cpass ls | grep -E '.+\.gov'
-	test@site.gov (12)'
-
-### opening bookmarks
-To open a bookmark, simply supply cpass with your account in the 'username@site' format:
-
-	$ cpass open test@site.gov
-	secret (will not echo): 
-	copied to clipboard.
+A user's primary bookmarks file is located at `$HOME/.CryptopassBookmarks.txt`. To use a different bookmarks file give it's path using the `-b` flag.
 
 ## building
 Using the `make(1)` command:
