@@ -23,7 +23,8 @@ import (
 const (
 	iterations    = 5000   // pbkdf2 iterations
 	xselPath      = "xsel" // path to xsel(1)
-	clipPath      = "/mnt/c/Windows/system32/clip.exe" // windows clip.exe path
+	wslClipPath      = "/mnt/c/Windows/system32/clip.exe" // windows clip.exe path
+	winClipPath      = "C:\\Windows\\system32\\clip.exe" // windows clip.exe path
 	osReleasePath = "/proc/sys/kernel/osrelease"
 	printWarn     = "WARNING: will print password to stdout\n"
 	secretPrompt  = "secret (will not echo): " // prompt for secret
@@ -144,8 +145,10 @@ func clipboard(input string) error {
 	var clipCmd *exec.Cmd
 
 	// if we are running on WSL or Windows, use windows' clip.exe
-	if getOS() == "WSL" || getOS() == "windows" {
-		clipCmd = exec.Command(clipPath)
+	if getOS() == "WSL" {
+		clipCmd = exec.Command(wslClipPath)
+	} else if getOS() == "windows" {
+		clipCmd = exec.Command(winClipPath)
 	} else {
 		// xsel command
 		clipCmd = exec.Command(xselArgs[0], xselArgs[1:]...)
