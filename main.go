@@ -12,8 +12,8 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"strings"
 	"runtime"
+	"strings"
 
 	// external dependencies...
 	"golang.org/x/crypto/pbkdf2"
@@ -21,10 +21,10 @@ import (
 )
 
 const (
-	iterations    = 5000   // pbkdf2 iterations
-	xselPath      = "xsel" // path to xsel(1)
-	wslClipPath      = "/mnt/c/Windows/system32/clip.exe" // windows clip.exe path
-	winClipPath      = "C:\\Windows\\system32\\clip.exe" // windows clip.exe path
+	iterations    = 5000                               // pbkdf2 iterations
+	xselPath      = "xsel"                             // path to xsel(1)
+	wslClipPath   = "/mnt/c/Windows/system32/clip.exe" // windows clip.exe path
+	winClipPath   = "C:\\Windows\\system32\\clip.exe"  // windows clip.exe path
 	osReleasePath = "/proc/sys/kernel/osrelease"
 	printWarn     = "WARNING: will print password to stdout\n"
 	secretPrompt  = "secret (will not echo): " // prompt for secret
