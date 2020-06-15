@@ -115,7 +115,7 @@ func list(bmarks Bookmarks) {
 
 // Checks which OS we are running on;
 // if it is WSL it returns "WSL"
-func getOS() String {
+func getOS() string {
 
 	// get runtime GOOS
 	ret := runtime.GOOS
