@@ -1,5 +1,5 @@
 # cpass
-Simple password manager written in Go, based on the [CryptoPass Chrome extension](https://github.com/dchest/cryptopass/ "CryptoPass GitHub") and compatible with the [Android implementation](https://f-droid.org/en/packages/krasilnikov.alexey.cryptopass/ "CryptoPass Android F-Droid Page")'s JSON backup files.
+Simple password manager written in Go, based on the [CryptoPass Chrome extension](https://github.com/dchest/cryptopass/ "CryptoPass GitHub") and compatible with the [Android implementation](https://f-droid.org/en/packages/krasilnikov.alexey.cryptopass/ "CryptoPass Android F-Droid Page") JSON backup files.
 
 The basic principle is that your password is generated from a username@site pair, and a  secret ("master" password):
 
@@ -7,7 +7,7 @@ The basic principle is that your password is generated from a username@site pair
 
 Note: The PBKDF2 algorithm used in `cpass` uses SHA-256 and 5000 iterations in order to be backwards compatible with both the Chrome extention and the Android application.
 
-After the the secret key is given, cpass will copy the resulting pbkdf2 key (your password) to the clipboard via the [`xsel(1)`](http://www.vergenet.net/~conrad/software/xsel/ "xsel Homepage") command.
+After the the secret key is given `cpass` will copy the generated key (your password) to the clipboard via the [`xsel(1)`](http://www.vergenet.net/~conrad/software/xsel/ "xsel Homepage") command on \*nix, or via `clip.exe` on windows.
 
 `cpass` works on Unix-like systems (Linux, *BSD) and also Windows and WSL.
 
