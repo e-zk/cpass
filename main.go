@@ -49,7 +49,7 @@ func usage() {
 	fmt.Printf("usage: %s [-p] [-b path] command [args]\n\n", os.Args[0])
 	fmt.Printf("where:\n")
 	fmt.Printf("\t-b path\t\tpath to bookmarks file\n")
-	fmt.Printf("\t-p\t\tprint the password to stdout instead of piping to xsel\n")
+	fmt.Printf("\t-p\t\tprint the password to stdout instead of piping to clipboard command\n")
 	fmt.Printf("\n")
 	fmt.Printf("valid commands:\n")
 	fmt.Printf("\thelp\t\t\tprint this help message\n")
@@ -113,27 +113,38 @@ func list(bmarks Bookmarks) {
 	}
 }
 
-// Checks if we are running on WSL
-func isWSL() bool {
-	ret := false
-	if runtime.GOOS == "linux" {
+// Checks which OS we are running on;
+// if it is WSL it returns "WSL"
+func getOS() String {
+
+	// get runtime GOOS
+	ret := runtime.GOOS
+
+	// check if we are running on WSL by examining version string
+	// located in /proc
+	if ret == "linux" {
 		verBytes, err := ioutil.ReadFile(osReleasePath)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		ret = strings.HasSuffix(string(verBytes), "Microsoft\n")
+		if strings.HasSuffix(string(verBytes), "Microsoft\n") {
+			ret = "WSL"
+		}
 	}
+
+	// return OS
 	return ret
 }
 
 // Copies a string to the clipboard via xsel(1)
 func clipboard(input string) error {
 
+	// command variable
 	var clipCmd *exec.Cmd
 
-	// if we are running on WSL, use windows' clip.exe
-	if isWSL() {
+	// if we are running on WSL or Windows, use windows' clip.exe
+	if getOS == "WSL" || getOS == "windows" {
 		clipCmd = exec.Command(clipPath)
 	} else {
 		// xsel command
