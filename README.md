@@ -11,50 +11,9 @@ After the the secret key is given, cpass will copy the resulting pbkdf2 key (you
 
 Currently cpass only supports Unix-like systems (GNU/Linux, and \*BSD). (You can use the -p flag to print the password in plain text to stdout, this should work on all unix-like environments, including WSL on Windows).
 
-## building
-Using the `make(1)` command:
-
-	# install dependencies (optional)
-	make deps
-	
-	# build cpass binary
-	make build
-
-### dependencies
-cpass depends on:
-
-* crypto/pbkdf2: [golang.org/x/crypto/pbkdf2](https://golang.org/x/crypto/pbkdf2)
-* crypto/ssh/terminal: [golang.org/x/crypto/ssh/terminal](golang.org/x/crypto/ssh/terminal)
-
-You can install these dependencies by running `make deps`.
-
-cpass also depends on the [`xsel(1)`](http://www.vergenet.net/~conrad/software/xsel/ "xsel Homepage") command. You can install it using your package manager.
-
-### installing
-First open `config.mk` to confirm install location. By default cpass is installed to /usr/local/bin; you will need to run `make install` as root:
-
-	# first obtain root shell via doas(1) or sudo(1)...
-	# install cpass to /usr/local
-	make install
-
-Installation location can also be changed through make flags:
-
-	# install to $HOME/bin
-	make PREFIX=$HOME install
-
 ## usage
 
-	usage: ./cpass [-p] [-b path] command [args]
-	
-	where:
-	        -b <path>               path to bookmarks file
-	        -p                      print password to stdout instead of piping to xsel
-	
-	command can be one of:
-	        help                    print this help message
-	        ls                      list available bookmarks
-	        find <string>           find a password containing <string>
-	        open <user@site>        open bookmark
+	synopsis: cpass [-p] [-b path] [help|ls|find|open] [args]
 
 In cpass, _bookmarks_ are account entries. A bookmark consists of: a username, a site URL, and the length of the password. Bookmarks are listed in the following format:
 
@@ -109,3 +68,35 @@ To open a bookmark, simply supply cpass with your account in the 'username@site'
 	$ cpass open test@site.gov
 	secret (will not echo): 
 	copied to clipboard.
+
+## building
+Using the `make(1)` command:
+
+	# install dependencies (optional)
+	make deps
+	
+	# build cpass binary
+	make build
+
+### dependencies
+cpass depends on:
+
+* crypto/pbkdf2: [golang.org/x/crypto/pbkdf2](https://golang.org/x/crypto/pbkdf2)
+* crypto/ssh/terminal: [golang.org/x/crypto/ssh/terminal](golang.org/x/crypto/ssh/terminal)
+
+You can install these dependencies by running `make deps`.
+
+cpass also depends on the [`xsel(1)`](http://www.vergenet.net/~conrad/software/xsel/ "xsel Homepage") command. You can install it using your package manager.
+
+### installing
+First open `config.mk` to confirm install location. By default cpass is installed to /usr/local/bin; you will need to run `make install` as root:
+
+	# first obtain root shell via doas(1) or sudo(1)...
+	# install cpass to /usr/local
+	make install
+
+Installation location can also be changed through make flags:
+
+	# install to $HOME/bin
+	make PREFIX=$HOME install
+
