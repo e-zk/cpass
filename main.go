@@ -20,6 +20,7 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
+// strings
 const (
 	iterations    = 5000                               // pbkdf2 iterations
 	xselPath      = "xsel"                             // path to xsel(1)
@@ -223,14 +224,18 @@ func main() {
 	}
 
 	// file to open
+	var defaultFile string
 	var bookmarksFile string
 	var printPasswd bool
+	defaultPrint := false
 
 	// the default bookmarks file location is $HOME/.CryptopassBookmarks.txt:
-	defaultFile := fmt.Sprintf("%s/.CryptopassBookmarks.txt", os.Getenv("HOME"))
-
-	//
-	defaultPrint := false
+	configHome := os.Getenv("XDG_CONFIG_HOME")
+	if configHome == "" {
+		defaultFile = fmt.Sprintf("%s/.config/cpass/bookmarks.json", os.Getenv("HOME"))
+	} else {
+		defaultFile = fmt.Sprintf("%s/cpass/bookmarks.json", configHome)
+	}
 
 	// flag to enable custom path to bookmarks file...
 	flag.StringVar(&bookmarksFile, "b", defaultFile, "bookmarks file")
@@ -253,7 +258,7 @@ func main() {
 	bmarks, err := loadBookmarks(bookmarksFile)
 	if err != nil {
 		log.Println(err)
-		panic(err)
+		log.Fatal(err)
 	}
 
 	// command parsing
