@@ -1,3 +1,4 @@
+
 # cpass (POSIX) Makefile
 .POSIX:
 .SUFFIXES:
@@ -9,20 +10,18 @@ all: build
 
 # build the binary
 build: 
-	$(GOBUILD) -o $(BIN) -v 
+	go build -o $(PROG) -v 
 
 # install third-party dependencies (2)
 deps:
-	$(GOGET) golang.org/x/crypto/pbkdf2
-	$(GOGET) golang.org/x/crypto/ssh/terminal
+	go get golang.org/x/crypto/pbkdf2
+	go get golang.org/x/crypto/ssh/terminal
 
 # install
 install:build
-	[ -f $(INSTALLPATH) ] && rm -i $(INSTALLPATH)
-	cp -v $(BIN) $(INSTALLPATH)
-	chmod +x $(INSTALLPATH)
+	install $(PROG) $(INSTALLPATH)
 
 # clean up
 clean:
-	$(GOCMD) clean
-	rm -f $(BIN)
+	go clean
+	rm -f $(PROG)

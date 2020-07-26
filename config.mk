@@ -1,11 +1,7 @@
 # binary name
-BIN = cpass
+PROG = cpass
 
 # install location
 PREFIX = /usr/local
-INSTALLPATH = $(PREFIX)/bin/$(BIN)
+INSTALLPATH = $(PREFIX)/bin/$(PROG)
 
-# go
-GOCMD = go
-GOBUILD = $(GOCMD) build
-GOGET = $(GOCMD) get
