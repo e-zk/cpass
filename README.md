@@ -69,16 +69,9 @@ A "bookmarks file" is a simple JSON file that holds a collection of bookmarks. A
 		}
 	]
 
-A user's primary bookmarks file is located at `$HOME/.CryptopassBookmarks.txt`. To use a different bookmarks file give it's path using the `-b` flag.
+A user's primary bookmarks file is located at `$XDG_CONFIG_HOME/cpass/bookmarks.json`. To use a different bookmarks file provide a path using the `-b` flag.
 
-## building
-Using the `make(1)` command:
-
-	# install dependencies (optional)
-	make deps
-	
-	# build cpass binary
-	make build
+## build + installation
 
 ### dependencies
 cpass depends on:
@@ -86,19 +79,19 @@ cpass depends on:
 * crypto/pbkdf2: [golang.org/x/crypto/pbkdf2](https://golang.org/x/crypto/pbkdf2)
 * crypto/ssh/terminal: [golang.org/x/crypto/ssh/terminal](golang.org/x/crypto/ssh/terminal)
 
-You can install these dependencies by running `make deps`.
-
 cpass also depends on the [`xsel(1)`](http://www.vergenet.net/~conrad/software/xsel/ "xsel Homepage") command. You can install it using your package manager.
 
 ### installing
-First open `config.mk` to confirm install location. By default cpass is installed to /usr/local/bin; you will need to run `make install` as root:
+The recommended way to build and install `cpass` is to use [`mk(1)`](http://man.cat-v.org/plan_9/1/mk), however a standard `Makefile` is included and should be compatible with both BSD and GNU `make`. More info on `mk` can be found [here](http://doc.cat-v.org/plan_9/4th_edition/papers/mk).
 
-	# first obtain root shell via doas(1) or sudo(1)...
-	# install cpass to /usr/local
+	mk
+	mk install
+
+or, when using `make`:
+
+	make
 	make install
 
-Installation location can also be changed through make flags:
+By default `make install` installs cpass to `/usr/local/bin`. The install prefix (the `/usr/local` part) can be changed by using the PREFIX make flag:
 
-	# install to $HOME/bin
-	make PREFIX=$HOME install
-
+	mk PREFIX=/path/to/dir install
