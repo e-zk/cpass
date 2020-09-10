@@ -26,7 +26,7 @@ const (
 	xselPath      = "xsel"                             // path to xsel(1)
 	wslClipPath   = "/mnt/c/Windows/system32/clip.exe" // windows clip.exe path
 	winClipPath   = "C:\\Windows\\system32\\clip.exe"  // windows clip.exe path
-	osReleasePath = "/proc/sys/kernel/osrelease"
+	osReleasePath = "/proc/sys/kernel/osrelease"       // change to LINUX releasePath
 	printWarn     = "WARNING: will print password to stdout\n"
 	secretPrompt  = "secret (will not echo): " // prompt for secret
 )
@@ -130,10 +130,11 @@ func getOS() string {
 			log.Fatal(err)
 		}
 
-		if strings.HasSuffix(string(verBytes), "Microsoft\n") {
+		if strings.HasSuffix(string(verBytes), "microsoft-standard\n") {
 			ret = "WSL"
 		}
 	}
+
 
 	// return OS
 	return ret
