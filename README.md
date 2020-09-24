@@ -62,16 +62,10 @@ cpass is still very much a work in progress, there is still much to be done.
 
 ## plans
 
-* adding + editing bookmarks
-
-* removing bookmarks
-
-* wayland clipboard support (idk if xsel works on wayland)
-
-* moving away from xsel as a dependency on \*BSD and Linux
-
-* encrypted `bookmarks.json` file for extra secrecy
-
-* configuratble Terminal User Interface (TUI)
-
-* GUI version(?)
+* adding + editing bookmarks  
+* removing bookmarks  
+* wayland clipboard support (idk if xsel works on wayland)  
+* moving away from xsel as a dependency on \*BSD and Linux  
+* encrypted `bookmarks.json` file for extra secrecy  
+* configuratble Terminal User Interface (TUI)  
+* GUI version(?)  
