@@ -54,6 +54,14 @@ $ cpass find substring
 joe.blogs@substring.com (32)
 ```
 
+## dependencies
+cpass depends on the following Go modules:
+
+* crypto/pbkdf2: golang.org/x/crypto/pbkdf2  
+* crypto/ssh/terminal: golang.org/x/crypto/ssh/terminal  
+
+Additionally, on Linux and \*BSD `xsel` is required. You can probably install it using your package manager. 
+
 ## status
 
 Currently there is only support forLinux and *BSD (X11), Windows and WSL2, because these are the operating systems I use daily.
