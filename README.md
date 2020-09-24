@@ -57,8 +57,8 @@ joe.blogs@substring.com (32)
 ## dependencies
 cpass depends on the following Go modules:
 
-* crypto/pbkdf2: (golang.org/x/crypto/pbkdf2)[https://godoc.org/golang.org/x/crypto/pbkdf2]  
-* crypto/ssh/terminal: (golang.org/x/crypto/ssh/terminal)[https://godoc.org/golang.org/x/crypto/ssh/terminal]  
+* crypto/pbkdf2: [golang.org/x/crypto/pbkdf2](https://godoc.org/golang.org/x/crypto/pbkdf2)  
+* crypto/ssh/terminal: [golang.org/x/crypto/ssh/terminal](https://godoc.org/golang.org/x/crypto/ssh/terminal)  
 
 Additionally, on Linux and \*BSD `xsel` is required. You can probably install it using your package manager. 
 
