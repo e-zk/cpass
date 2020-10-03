@@ -1,97 +1,79 @@
 # cpass
-Simple password manager written in Go, based on the [CryptoPass Chrome extension](https://github.com/dchest/cryptopass/ "CryptoPass GitHub") and compatible with the [Android implementation](https://f-droid.org/en/packages/krasilnikov.alexey.cryptopass/ "CryptoPass Android F-Droid Page") JSON backup files.
 
-The basic principle is that your password is generated from a username@site pair, and a  secret ("master" password):
+CLI password manager written in Go.
 
-	password = base64(pbkdf2(secret, username@url))[:length]
+Password entries, or "bookmarks" are identified in the format `user@domain` (e.g. `sam@website.org`). In cpass no passwords are actually stored anywhere. Instead, a password derivation algorithm is used (PBKDF2, SHA256, 5000 iterations) on your username+domain identifier, plus a secret key. The resulting of the key derivation algorith is encoded in base64 and stripped down to your desired length - this is your password.
 
-Note: The PBKDF2 algorithm used in `cpass` uses SHA-256 and 5000 iterations in order to be backwards compatible with both the Chrome extention and the Android application.
+*Remember: your passwords are generated using a secret key - without knowledge of this key your passwords cannot be derived.*
 
-After the the secret key is given `cpass` will copy the generated key (your password) to the clipboard via the [`xsel(1)`](http://www.vergenet.net/~conrad/software/xsel/ "xsel Homepage") command on \*nix, or via `clip.exe` on windows.
-
-`cpass` works on Unix-like systems (Linux, *BSD) and also Windows and WSL.
+To build cpass, run `mk` or `make` (the `Makefile` supports both BSD and GNU make).
 
 ## usage
 
-	cpass [-p] [-b path] [help|ls|find|open] [args]
+```console
+cpass [-p] [-f] [-b FILE] COMMAND
+  -p               print password to stdout.
+  -b FILE          bookmarks JSON file to use.
+  -f               do not ask before removing.
+  COMMAND:
+    help           show this help message.
+    ls             list bookmarks.
+    find STRING    search for bookmarks containing substring STRING.
+    open BOOKMARK  open bookmark with identifier in `user@domain`
+                   format.
+    add ID KEYLEN  add a new bookmark. ID is `site@domain`, KEYLEN is
+                   the desired limit of key length.
+    rm ID          remove password. will ask to confirm unless -f is
+                   given.
+```
 
-### finding bookmarks
-In cpass, _bookmarks_ are account entries. A bookmark consists of: a username, a site URL, and the length of the password.  
-To list all available bookmarks, simply run `cpass ls`:
+*Note: functionality for adding and removing bookmarks has not yet been implemented.*
 
-	$ cpass ls
-	person@www.google.com (18)
-	test@site.gov (12)
+Accessing a a bookmark is easy:
 
-Bookmarks are listed in the following format:
+```console
+$ cpass open myuser@website.com
+secret (will not echo):
+copied to clipboard.
+```
 
-	person@www.google.com (18)
-	└┬───┘ └┬───────────┘  ├┘
-	 │      │              └ password length
-	 │      └ site URL
-	 └ username
+Listing available bookmarks:
 
-To find passwords containing a specific string; run `cpass find <string>`:
+```console
+$ cpass ls
+joe.blogs@firefox.com (24)
+jjb@tutanota.com (16)
+```
 
-	$ cpass find site.gov
-	test@site.gov (12)
+Here, the number in parenthesis is the length of the password.
 
-The `find` command tries to match the given string within the whole bookmark identifier ('username@site'). So, using an entire or partial bookmark identifier works:
+Finding bookmarks:
 
-	$ cpass find son@wwww.google
-	person@www.google.com (18)
+```console
+$ cpass find substring
+joe.blogs@substring.com (32)
+```
 
-If you wish, the output of `cpass ls` can be piped into other programs, such as `grep(1)`:
+## dependencies
+cpass depends on the following Go modules:
 
-	$ cpass ls | grep -E '.+\.gov'
-	test@site.gov (12)'
+* crypto/pbkdf2: [golang.org/x/crypto/pbkdf2](https://godoc.org/golang.org/x/crypto/pbkdf2)  
+* crypto/ssh/terminal: [golang.org/x/crypto/ssh/terminal](https://godoc.org/golang.org/x/crypto/ssh/terminal)  
 
-### opening bookmarks
-To open a bookmark supply cpass with your account in the 'username@site' format:
+Additionally, on Linux and \*BSD `xsel` is required. You can probably install it using your package manager. 
 
-	$ cpass open test@site.gov
-	secret (will not echo): 
-	copied to clipboard.
+## status
 
-### file format
-A "bookmarks file" is a simple JSON file that holds a collection of bookmarks. An example bookmarks file, containing two bookmarks, would look like this:
+Currently there is only support forLinux and *BSD (X11), Windows and WSL2, because these are the operating systems I use daily.
 
-	[
-		{
-			"url": "www.google.com",
-			"username": "person",
-			"length": 18
-		},
-		{
-			"url": "site.gov",
-			"username": "test",
-			"length": 12
-		}
-	]
+cpass is still very much a work in progress, there is still much to be done.
 
-A user's primary bookmarks file is located at `$XDG_CONFIG_HOME/cpass/bookmarks.json`. To use a different bookmarks file provide a path using the `-b` flag.
+## plans
 
-## build + installation
-
-### dependencies
-cpass depends on:
-
-* crypto/pbkdf2: [golang.org/x/crypto/pbkdf2](https://golang.org/x/crypto/pbkdf2)
-* crypto/ssh/terminal: [golang.org/x/crypto/ssh/terminal](golang.org/x/crypto/ssh/terminal)
-
-cpass also depends on the [`xsel(1)`](http://www.vergenet.net/~conrad/software/xsel/ "xsel Homepage") command. You can install it using your package manager.
-
-### installing
-The recommended way to build and install `cpass` is to use [`mk(1)`](http://man.cat-v.org/plan_9/1/mk), however a standard `Makefile` is included and should be compatible with both BSD and GNU `make`. More info on `mk` can be found [here](http://doc.cat-v.org/plan_9/4th_edition/papers/mk).
-
-	mk
-	mk install
-
-or, when using `make`:
-
-	make
-	make install
-
-By default `make install` installs cpass to `/usr/local/bin`. The install prefix (the `/usr/local` part) can be changed by using the PREFIX make flag:
-
-	mk PREFIX=/path/to/dir install
+* adding + editing bookmarks  
+* removing bookmarks  
+* wayland clipboard support (idk if xsel works on wayland)  
+* moving away from xsel as a dependency on \*BSD and Linux  
+* encrypted `bookmarks.json` file for extra secrecy  
+* configuratble Terminal User Interface (TUI)  
+* GUI version(?)  
