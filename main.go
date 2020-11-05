@@ -50,14 +50,14 @@ func usage() {
 
 	fmt.Printf("usage: %s [-p] [-b path] command [args]\n\n", os.Args[0])
 	fmt.Printf("where:\n")
-	fmt.Printf("\t-b path\t\tpath to bookmarks file\n")
-	fmt.Printf("\t-p\t\tprint the password to stdout instead of piping to clipboard command\n")
+	fmt.Printf("    -b path   path to bookmarks file\n")
+	fmt.Printf("    -p        print the password to stdout instead of piping to clipboard command\n")
 	fmt.Printf("\n")
 	fmt.Printf("valid commands:\n")
-	fmt.Printf("\thelp\t\t\tprint this help message\n")
-	fmt.Printf("\tls\t\t\tlist available bookmarks\n")
-	fmt.Printf("\tfind 'string'\t\tsearch for a password containing a string\n")
-	fmt.Printf("\topen user@site\topen bookmark with id 'user@site'\n")
+	fmt.Printf("    help            print this help message\n")
+	fmt.Printf("    ls              list available bookmarks\n")
+	fmt.Printf("    find 'string'   search for a password containing a string\n")
+	fmt.Printf("    open user@site  open bookmark with id 'user@site'\n")
 }
 
 // Generate password from given secret, and Bookmark
@@ -134,7 +134,6 @@ func getOS() string {
 			ret = "WSL"
 		}
 	}
-
 
 	// return OS
 	return ret
@@ -217,20 +216,18 @@ func loadBookmarks(bookmarksFile string) (bmarks Bookmarks, err error) {
 // Main program logic
 func main() {
 
-	// test if arguments are insufficient...
 	if len(os.Args) == 1 {
 		fmt.Printf("insufficient arguments given\n")
 		usage()
 		return
 	}
 
-	// file to open
 	var defaultFile string
 	var bookmarksFile string
 	var printPasswd bool
-	defaultPrint := false
+	var narg int
+	var defaultPrint bool = false
 
-	// the default bookmarks file location is $HOME/.CryptopassBookmarks.txt:
 	configHome := os.Getenv("XDG_CONFIG_HOME")
 	if configHome == "" {
 		defaultFile = fmt.Sprintf("%s/.config/cpass/bookmarks.json", os.Getenv("HOME"))
@@ -238,18 +235,14 @@ func main() {
 		defaultFile = fmt.Sprintf("%s/cpass/bookmarks.json", configHome)
 	}
 
-	// flag to enable custom path to bookmarks file...
 	flag.StringVar(&bookmarksFile, "b", defaultFile, "bookmarks file")
 	flag.BoolVar(&printPasswd, "p", defaultPrint, "print password to stdout, instead of passing it to xclip")
-	flag.Usage = usage // enable custom usage function
-	flag.Parse()       // parse flags
-
-	// number of arguments remaining after flags are parsed
-	narg := len(os.Args) - flag.NArg()
+	flag.Usage = usage
+	flag.Parse()
 
 	// if the number of arguments remaining are less than one, fail and return
 	// usage information
-	if narg < 1 {
+	if narg = len(os.Args) - flag.NArg(); narg < 1 {
 		fmt.Printf("insufficient arguments given\n")
 		usage()
 		return
@@ -262,7 +255,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// command parsing
+	// subcommand parsing
 	switch os.Args[narg] {
 	case "help":
 		usage()
