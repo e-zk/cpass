@@ -2,7 +2,7 @@
 
 CLI password manager written in Go.
 
-Password entries, or "bookmarks" are identified in the format `user@domain` (e.g. `sam@website.org`). In cpass no passwords are actually stored anywhere. Instead, a password derivation algorithm is used (PBKDF2, SHA256, 5000 iterations) on your username+domain identifier, plus a secret key. The resulting of the key derivation algorith is encoded in base64 and stripped down to your desired length - this is your password.
+In cpass password entries or "bookmarks" are identified in the format `user@domain` (e.g. `sam@website.org`). cpass doesn't actually store passwords anywhere. Instead, a password derivation algorithm is used (PBKDF2, SHA256, 5000 iterations) on your username+domain identifier, plus a secret key. The resulting of the key derivation algorith is encoded in base64 and stripped down to your desired length - this is your password.
 
 *Remember: your passwords are generated using a secret key - without knowledge of this key your passwords cannot be derived.*
 
@@ -64,7 +64,7 @@ Additionally, on Linux and \*BSD `xsel` is required. You can probably install it
 
 ## status
 
-Currently there is only support forLinux and *BSD (X11), Windows and WSL2, because these are the operating systems I use daily.
+Currently there is only support for Linux and *BSD (X11), Windows and WSL2, because these are the operating systems I use daily.
 
 cpass is still very much a work in progress, there is still much to be done.
 
