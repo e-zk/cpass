@@ -1,7 +1,7 @@
-
 # cpass (POSIX) Makefile
 .POSIX:
 .SUFFIXES:
+.PHONY: clean build deps install
 
 include config.mk
 
