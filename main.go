@@ -15,24 +15,22 @@ import (
 	"runtime"
 	"strings"
 
-	// external dependencies...
 	"golang.org/x/crypto/pbkdf2"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-// strings
 const (
-	iterations    = 5000                               // pbkdf2 iterations
-	xselPath      = "xsel"                             // path to xsel(1)
+	iterations    = 5000 // pbkdf2 iterations
+	xselPath      = "xsel"
 	wslClipPath   = "/mnt/c/Windows/system32/clip.exe" // windows clip.exe path
 	winClipPath   = "C:\\Windows\\system32\\clip.exe"  // windows clip.exe path
-	osReleasePath = "/proc/sys/kernel/osrelease"       // change to LINUX releasePath
+	osReleasePath = "/proc/sys/kernel/osrelease"       // TODO change to LINUX releasePath
 	printWarn     = "WARNING: will print password to stdout\n"
-	secretPrompt  = "secret (will not echo): " // prompt for secret
+	secretPrompt  = "secret (will not echo): "
 )
 
 var (
-	xselArgs = []string{xselPath, "-i"} // xsel(1) arguments
+	xselArgs = []string{xselPath, "-i"}
 )
 
 // A bookmark is defined as follows in the JSON backup format...
@@ -42,7 +40,6 @@ type Bookmark struct {
 	Length   int    `json:"length"`
 }
 
-// Bookmarks is a list of type Bookmark
 type Bookmarks []Bookmark
 
 // Prints program usage information
@@ -79,30 +76,27 @@ func genPassword(secret []byte, bmark *Bookmark) string {
 // Get secret from user
 func inputSecret() ([]byte, error) {
 
-	// prompt for input
 	fmt.Printf(secretPrompt)
 
 	// use terminal API to read user password without echoing
 	secret, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 	fmt.Printf("\n")
 
-	// return the user's secret
 	return secret, err
 }
 
-// Filter a list of bookmarks, based on a keyword and return bookmarks which match this keyword
+// Filter a list of bookmarks based on a keyword and return bookmarks which
+// match
 func filterList(bmarks Bookmarks, filter string) (outBmarks Bookmarks) {
 
-	// if the filter string is within the Username or URL
+	// if the filter string is within the Username or URL append it to the list
 	for _, bmark := range bmarks {
 		fullname := fmt.Sprintf("%s@%s", bmark.Username, bmark.Url)
 		if strings.Contains(fullname, filter) {
-			// append the bookmark to outBmarks
 			outBmarks = append(outBmarks, bmark)
 		}
 	}
 
-	// return the filtered list of bookmarks
 	return outBmarks
 }
 
@@ -151,7 +145,6 @@ func clipboard(input string) error {
 	} else if getOS() == "windows" {
 		clipCmd = exec.Command(winClipPath)
 	} else {
-		// xsel command
 		clipCmd = exec.Command(xselArgs[0], xselArgs[1:]...)
 	}
 
@@ -178,8 +171,7 @@ func getBmark(bmarks Bookmarks, user string, site string) (*Bookmark, error) {
 		id := fmt.Sprintf("%s@%s", user, site)
 		bmarkId := fmt.Sprintf("%s@%s", bmark.Username, bmark.Url)
 
-		// if the given id matches the current bookmark's,
-		// then return a pointer to it
+		// if the given id matches the current bookmark's  then return a pointer
 		if id == bmarkId {
 			return &bmark, nil
 		}
@@ -194,20 +186,20 @@ func loadBookmarks(bookmarksFile string) (bmarks Bookmarks, err error) {
 	// open the file
 	jsonFile, err := os.Open(bookmarksFile)
 	if err != nil {
-		return bmarks, err
+		return nil, err
 	}
 	defer jsonFile.Close()
 
 	// convert the file to a byte array
 	jsonBytes, err := ioutil.ReadAll(jsonFile)
 	if err != nil {
-		return bmarks, err
+		return nil, err
 	}
 
 	// encode the JSON to the Bookmarks struct array
 	err = json.Unmarshal(jsonBytes, &bmarks)
 	if err != nil {
-		return bmarks, err
+		return nil, err
 	}
 
 	return bmarks, nil
@@ -222,12 +214,15 @@ func main() {
 		return
 	}
 
-	var defaultFile string
-	var bookmarksFile string
-	var printPasswd bool
-	var narg int
-	var defaultPrint bool = false
+	var (
+		defaultFile   string
+		bookmarksFile string
+		printPasswd   bool
+		narg          int
+		defaultPrint  bool = false
+	)
 
+	// get config dir
 	configHome := os.Getenv("XDG_CONFIG_HOME")
 	if configHome == "" {
 		defaultFile = fmt.Sprintf("%s/.config/cpass/bookmarks.json", os.Getenv("HOME"))
@@ -235,6 +230,7 @@ func main() {
 		defaultFile = fmt.Sprintf("%s/cpass/bookmarks.json", configHome)
 	}
 
+	// flags
 	flag.StringVar(&bookmarksFile, "b", defaultFile, "bookmarks file")
 	flag.BoolVar(&printPasswd, "p", defaultPrint, "print password to stdout, instead of passing it to xclip")
 	flag.Usage = usage
