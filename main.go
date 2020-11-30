@@ -1,10 +1,6 @@
 package main
 
 import (
-	"crypto/sha256"
-	"encoding/base64"
-	"encoding/json"
-	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -13,28 +9,19 @@ import (
 	"runtime"
 	"strings"
 
-	"golang.org/x/crypto/pbkdf2"
-	"golang.org/x/crypto/ssh/terminal"
+	"github.com/e-zk/cpass/internal/bmark"
 
 	"github.com/atotto/clipboard"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 const (
-	iterations    = 5000
 	wslClipPath   = "/mnt/c/Windows/system32/clip.exe"
 	winClipPath   = "C:\\Windows\\system32\\clip.exe"
 	osReleasePath = "/proc/sys/kernel/osrelease" // TODO change to LINUX releasePath
 	printWarn     = "WARNING: will print password to stdout\n"
 	secretPrompt  = "secret (will not echo): "
 )
-
-// A bookmark is defined as follows in the JSON backup format...
-type Bookmark struct {
-	Url      string `json:"url"`
-	Username string `json:"username"`
-	Length   int    `json:"length"`
-}
-type Bookmarks []Bookmark
 
 // Prints program usage information
 func usage() {
@@ -51,27 +38,6 @@ func usage() {
 	fmt.Printf("    open <id>        open bookmark with id 'user@site'\n")
 }
 
-// Apply PBKDF2 with given secret and salt, output base64 encoded key
-func genPassword(secret []byte, salt []byte, length int) string {
-
-	// generate the pbkdf2 key based on the input values
-	pbkdf2Hmac := pbkdf2.Key(secret, salt, iterations, 32, sha256.New)
-
-	// encode the resulting pbkdf2 key in base64
-	b64Encoded := base64.StdEncoding.EncodeToString([]byte(pbkdf2Hmac))
-
-	// cut the encoded key down to the given length; this is the final password
-	return b64Encoded[:length]
-}
-
-/* Generate password from bookmark */
-func (b Bookmark) GetPassword(secret []byte) string {
-
-	// the salt is "user@site"
-	salt := fmt.Sprintf("%s@%s", b.Username, b.Url)
-	return genPassword(secret, []byte(salt), b.Length)
-}
-
 // Get secret from user
 func inputSecret() ([]byte, error) {
 
@@ -82,30 +48,6 @@ func inputSecret() ([]byte, error) {
 	fmt.Printf("\n")
 
 	return secret, err
-}
-
-// Filter a list of bookmarks based on a keyword and return bookmarks which
-// match
-func filterList(bmarks Bookmarks, filter string) (outBmarks Bookmarks) {
-
-	// if the filter string is within the Username or URL append it to the list
-	for _, bmark := range bmarks {
-		fullname := fmt.Sprintf("%s@%s", bmark.Username, bmark.Url)
-		if strings.Contains(fullname, filter) {
-			outBmarks = append(outBmarks, bmark)
-		}
-	}
-
-	return outBmarks
-}
-
-// Print a list of bookmarks out
-func list(bmarks Bookmarks) {
-
-	// foreach bookmark in the bookmarks array...
-	for _, bmark := range bmarks {
-		fmt.Printf("%s@%s (%d)\n", bmark.Username, bmark.Url, bmark.Length)
-	}
 }
 
 // Checks which OS we are running on;
@@ -160,50 +102,6 @@ func getOS() string {
 //	return nil
 //}
 
-// Returns a pointer to a Bookmark if it can be found within a list of bookmarks
-func getBmark(bmarks Bookmarks, user string, site string) (*Bookmark, error) {
-
-	// for each bookmark in the given bmarks...
-	for _, bmark := range bmarks {
-
-		// the identifier is 'user@site'
-		id := fmt.Sprintf("%s@%s", user, site)
-		bmarkId := fmt.Sprintf("%s@%s", bmark.Username, bmark.Url)
-
-		// if the given id matches the current bookmark's  then return a pointer
-		if id == bmarkId {
-			return &bmark, nil
-		}
-	}
-
-	return new(Bookmark), errors.New("bookmark could not be found")
-}
-
-// Load bookmarks from a .JSON backup file
-func loadBookmarks(bookmarksFile string) (bmarks Bookmarks, err error) {
-
-	// open the file
-	jsonFile, err := os.Open(bookmarksFile)
-	if err != nil {
-		return nil, err
-	}
-	defer jsonFile.Close()
-
-	// convert the file to a byte array
-	jsonBytes, err := ioutil.ReadAll(jsonFile)
-	if err != nil {
-		return nil, err
-	}
-
-	// encode the JSON to the Bookmarks struct array
-	err = json.Unmarshal(jsonBytes, &bmarks)
-	if err != nil {
-		return nil, err
-	}
-
-	return bmarks, nil
-}
-
 // Main program logic
 func main() {
 
@@ -244,7 +142,7 @@ func main() {
 	}
 
 	// load the bookmarks file...
-	bmarks, err := loadBookmarks(bookmarksFile)
+	bmarks, err := bmark.LoadFromFile(bookmarksFile)
 	if err != nil {
 		log.Println(err)
 		log.Fatal(err)
@@ -255,11 +153,11 @@ func main() {
 	case "help":
 		usage()
 	case "ls":
-		list(bmarks)
+		print(bmarks.String())
 	case "find":
 		// filter the bookmarks, then list them
-		bmarks = filterList(bmarks, os.Args[narg+1])
-		list(bmarks)
+		bmarks = bmarks.Filter(os.Args[narg+1])
+		print(bmarks.String())
 	case "open":
 
 		// print warning message if applicable
@@ -273,11 +171,12 @@ func main() {
 		// get the position of the last '@'
 		i := strings.LastIndex(givenBmark, "@")
 
-		user := givenBmark[:i]   // user is everything before the last '@'
-		site := givenBmark[i+1:] // url is everything after the last '@' (not including it)
+		// extract user + site
+		user := givenBmark[:i]
+		site := givenBmark[i+1:]
 
-		// get pointer to Bookmark that matches the given user+site
-		bmark, err := getBmark(bmarks, user, site)
+		// get Bookmark that matches the given user+site
+		bmark, err := bmarks.Get(user, site)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -289,24 +188,21 @@ func main() {
 		}
 
 		// generate the password from the given secret
-		password := bmark.GetPassword(secret)
+		password := bmark.GenPassword(secret)
 
 		// print the password to stdout if -s is set;
-		// if not set, then copy the password to the clipboard via xsel
+		// if not set, then copy the password to the clipboard
 		if printPasswd {
 			fmt.Printf("%s\n", password)
 		} else {
-			// copy the password to the clipboard
 			err = clipboard.WriteAll(password)
 			if err != nil {
 				log.Fatal(err)
 			}
 		}
 	default:
-		// if any other command is given, show an error message and usage information
 		fmt.Printf("unknown command `%s'\n", os.Args[narg])
 		usage()
+		os.Exit(1)
 	}
-
-	return
 }
