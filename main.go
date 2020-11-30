@@ -1,26 +1,25 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
-	"runtime"
+	"os/exec"
 	"strings"
 
 	"github.com/e-zk/cpass/internal/bmark"
 
 	"github.com/atotto/clipboard"
+	"github.com/e-zk/wslcheck"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
 const (
-	wslClipPath   = "/mnt/c/Windows/system32/clip.exe"
-	winClipPath   = "C:\\Windows\\system32\\clip.exe"
-	osReleasePath = "/proc/sys/kernel/osrelease" // TODO change to LINUX releasePath
-	printWarn     = "WARNING: will print password to stdout\n"
-	secretPrompt  = "secret (will not echo): "
+	wslClipPath  = "/mnt/c/Windows/system32/clip.exe"
+	printWarn    = "WARNING: will print password to stdout\n"
+	secretPrompt = "secret (will not echo): "
 )
 
 // Prints program usage information
@@ -50,57 +49,36 @@ func inputSecret() ([]byte, error) {
 	return secret, err
 }
 
-// Checks which OS we are running on;
-// if it is WSL it returns "WSL"
-func getOS() string {
+/* Send string to clipboard */
+func clip(input string) error {
+	var (
+		wsl bool
+		err error
+	)
 
-	// get runtime GOOS
-	ret := runtime.GOOS
+	wsl, err = wslcheck.Check()
+	if err != nil {
+		return err
+	}
 
-	// check if we are running on WSL by examining version string
-	// located in /proc
-	if ret == "linux" {
-		verBytes, err := ioutil.ReadFile(osReleasePath)
+	// if we are running on WSL; execute clip.exe
+	// otherwise use clipboard module
+	if wsl {
+		cmd := exec.Command(wslClipPath)
+		cmd.Stdin = bytes.NewBuffer([]byte(input))
+		err = cmd.Run()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
-
-		if strings.HasSuffix(string(verBytes), "microsoft-standard\n") {
-			ret = "WSL"
+	} else {
+		err = clipboard.WriteAll(input)
+		if err != nil {
+			return err
 		}
 	}
 
-	// return OS
-	return ret
+	return nil
 }
-
-//// Copies a string to the clipboard via xsel(1)
-//func clipboard(input string) error {
-//
-//	// command variable
-//	var clipCmd *exec.Cmd
-//
-//	// if we are running on WSL or Windows, use windows' clip.exe
-//	if getOS() == "WSL" {
-//		clipCmd = exec.Command(wslClipPath)
-//	} else if getOS() == "windows" {
-//		clipCmd = exec.Command(winClipPath)
-//	} else {
-//		clipCmd = exec.Command(xselArgs[0], xselArgs[1:]...)
-//	}
-//
-//	// pass the input string to the standard input of the clipboard command
-//	clipCmd.Stdin = bytes.NewBuffer([]byte(input))
-//
-//	// run the command
-//	err := clipCmd.Run()
-//	if err != nil {
-//		return err
-//	}
-//
-//	fmt.Printf("copied to clipboard.\n")
-//	return nil
-//}
 
 // Main program logic
 func main() {
@@ -168,10 +146,9 @@ func main() {
 		// the bookmark given by the user
 		givenBmark := os.Args[narg+1]
 
-		// get the position of the last '@'
+		// extract user + site from 'user@site'
+		// done this way so that everything after the first @ is the site
 		i := strings.LastIndex(givenBmark, "@")
-
-		// extract user + site
 		user := givenBmark[:i]
 		site := givenBmark[i+1:]
 
@@ -190,12 +167,12 @@ func main() {
 		// generate the password from the given secret
 		password := bmark.GenPassword(secret)
 
-		// print the password to stdout if -s is set;
+		// print the password to stdout if -p is set;
 		// if not set, then copy the password to the clipboard
 		if printPasswd {
 			fmt.Printf("%s\n", password)
 		} else {
-			err = clipboard.WriteAll(password)
+			err = clip(password)
 			if err != nil {
 				log.Fatal(err)
 			}
