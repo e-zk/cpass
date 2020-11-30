@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
@@ -11,26 +10,22 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"os/exec"
 	"runtime"
 	"strings"
 
 	"golang.org/x/crypto/pbkdf2"
 	"golang.org/x/crypto/ssh/terminal"
+
+	"github.com/atotto/clipboard"
 )
 
 const (
 	iterations    = 5000
-	xselPath      = "xsel"
 	wslClipPath   = "/mnt/c/Windows/system32/clip.exe"
 	winClipPath   = "C:\\Windows\\system32\\clip.exe"
 	osReleasePath = "/proc/sys/kernel/osrelease" // TODO change to LINUX releasePath
 	printWarn     = "WARNING: will print password to stdout\n"
 	secretPrompt  = "secret (will not echo): "
-)
-
-var (
-	xselArgs = []string{xselPath, "-i"}
 )
 
 // A bookmark is defined as follows in the JSON backup format...
@@ -44,16 +39,16 @@ type Bookmarks []Bookmark
 // Prints program usage information
 func usage() {
 
-	fmt.Printf("usage: %s [flags] <subcommand [args]>\n\n", os.Args[0])
+	fmt.Printf("usage:\n")
+	fmt.Printf("    %s [flags] <subcommand [args]>\n\n", os.Args[0])
 	fmt.Printf("flags:\n")
-	fmt.Printf("    -b path   path to bookmarks file\n")
-	fmt.Printf("    -p        print the password to stdout instead of piping to clipboard\n")
-	fmt.Printf("\n")
-	fmt.Printf("valid subcommands are:\n")
-	fmt.Printf("    help            print this help message\n")
-	fmt.Printf("    ls              list available bookmarks\n")
-	fmt.Printf("    find 'string'   search for a password containing a string\n")
-	fmt.Printf("    open user@site  open bookmark with id 'user@site'\n")
+	fmt.Printf("    -b path          path to bookmarks file\n")
+	fmt.Printf("    -p               print the password to stdout instead of piping to clipboard\n\n")
+	fmt.Printf("subcommands:\n")
+	fmt.Printf("    help             print this help message\n")
+	fmt.Printf("    ls               list available bookmarks\n")
+	fmt.Printf("    find <string>    search for a password containing a string\n")
+	fmt.Printf("    open <id>        open bookmark with id 'user@site'\n")
 }
 
 // Apply PBKDF2 with given secret and salt, output base64 encoded key
@@ -137,33 +132,33 @@ func getOS() string {
 	return ret
 }
 
-// Copies a string to the clipboard via xsel(1)
-func clipboard(input string) error {
-
-	// command variable
-	var clipCmd *exec.Cmd
-
-	// if we are running on WSL or Windows, use windows' clip.exe
-	if getOS() == "WSL" {
-		clipCmd = exec.Command(wslClipPath)
-	} else if getOS() == "windows" {
-		clipCmd = exec.Command(winClipPath)
-	} else {
-		clipCmd = exec.Command(xselArgs[0], xselArgs[1:]...)
-	}
-
-	// pass the input string to the standard input of the clipboard command
-	clipCmd.Stdin = bytes.NewBuffer([]byte(input))
-
-	// run the command
-	err := clipCmd.Run()
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("copied to clipboard.\n")
-	return nil
-}
+//// Copies a string to the clipboard via xsel(1)
+//func clipboard(input string) error {
+//
+//	// command variable
+//	var clipCmd *exec.Cmd
+//
+//	// if we are running on WSL or Windows, use windows' clip.exe
+//	if getOS() == "WSL" {
+//		clipCmd = exec.Command(wslClipPath)
+//	} else if getOS() == "windows" {
+//		clipCmd = exec.Command(winClipPath)
+//	} else {
+//		clipCmd = exec.Command(xselArgs[0], xselArgs[1:]...)
+//	}
+//
+//	// pass the input string to the standard input of the clipboard command
+//	clipCmd.Stdin = bytes.NewBuffer([]byte(input))
+//
+//	// run the command
+//	err := clipCmd.Run()
+//	if err != nil {
+//		return err
+//	}
+//
+//	fmt.Printf("copied to clipboard.\n")
+//	return nil
+//}
 
 // Returns a pointer to a Bookmark if it can be found within a list of bookmarks
 func getBmark(bmarks Bookmarks, user string, site string) (*Bookmark, error) {
@@ -302,7 +297,7 @@ func main() {
 			fmt.Printf("%s\n", password)
 		} else {
 			// copy the password to the clipboard
-			err = clipboard(password)
+			err = clipboard.WriteAll(password)
 			if err != nil {
 				log.Fatal(err)
 			}
