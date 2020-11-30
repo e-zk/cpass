@@ -20,11 +20,11 @@ import (
 )
 
 const (
-	iterations    = 5000 // pbkdf2 iterations
+	iterations    = 5000
 	xselPath      = "xsel"
-	wslClipPath   = "/mnt/c/Windows/system32/clip.exe" // windows clip.exe path
-	winClipPath   = "C:\\Windows\\system32\\clip.exe"  // windows clip.exe path
-	osReleasePath = "/proc/sys/kernel/osrelease"       // TODO change to LINUX releasePath
+	wslClipPath   = "/mnt/c/Windows/system32/clip.exe"
+	winClipPath   = "C:\\Windows\\system32\\clip.exe"
+	osReleasePath = "/proc/sys/kernel/osrelease" // TODO change to LINUX releasePath
 	printWarn     = "WARNING: will print password to stdout\n"
 	secretPrompt  = "secret (will not echo): "
 )
@@ -39,38 +39,42 @@ type Bookmark struct {
 	Username string `json:"username"`
 	Length   int    `json:"length"`
 }
-
 type Bookmarks []Bookmark
 
 // Prints program usage information
 func usage() {
 
-	fmt.Printf("usage: %s [-p] [-b path] command [args]\n\n", os.Args[0])
-	fmt.Printf("where:\n")
+	fmt.Printf("usage: %s [flags] <subcommand [args]>\n\n", os.Args[0])
+	fmt.Printf("flags:\n")
 	fmt.Printf("    -b path   path to bookmarks file\n")
-	fmt.Printf("    -p        print the password to stdout instead of piping to clipboard command\n")
+	fmt.Printf("    -p        print the password to stdout instead of piping to clipboard\n")
 	fmt.Printf("\n")
-	fmt.Printf("valid commands:\n")
+	fmt.Printf("valid subcommands are:\n")
 	fmt.Printf("    help            print this help message\n")
 	fmt.Printf("    ls              list available bookmarks\n")
 	fmt.Printf("    find 'string'   search for a password containing a string\n")
 	fmt.Printf("    open user@site  open bookmark with id 'user@site'\n")
 }
 
-// Generate password from given secret, and Bookmark
-func genPassword(secret []byte, bmark *Bookmark) string {
-
-	// the salt is "user@site"
-	salt := fmt.Sprintf("%s@%s", bmark.Username, bmark.Url)
+// Apply PBKDF2 with given secret and salt, output base64 encoded key
+func genPassword(secret []byte, salt []byte, length int) string {
 
 	// generate the pbkdf2 key based on the input values
-	pbkdf2Hmac := pbkdf2.Key([]byte(secret), []byte(salt), iterations, 32, sha256.New)
+	pbkdf2Hmac := pbkdf2.Key(secret, salt, iterations, 32, sha256.New)
 
 	// encode the resulting pbkdf2 key in base64
 	b64Encoded := base64.StdEncoding.EncodeToString([]byte(pbkdf2Hmac))
 
 	// cut the encoded key down to the given length; this is the final password
-	return b64Encoded[:bmark.Length]
+	return b64Encoded[:length]
+}
+
+/* Generate password from bookmark */
+func (b Bookmark) GetPassword(secret []byte) string {
+
+	// the salt is "user@site"
+	salt := fmt.Sprintf("%s@%s", b.Username, b.Url)
+	return genPassword(secret, []byte(salt), b.Length)
 }
 
 // Get secret from user
@@ -231,8 +235,8 @@ func main() {
 	}
 
 	// flags
-	flag.StringVar(&bookmarksFile, "b", defaultFile, "bookmarks file")
-	flag.BoolVar(&printPasswd, "p", defaultPrint, "print password to stdout, instead of passing it to xclip")
+	flag.StringVar(&bookmarksFile, "b", defaultFile, "")
+	flag.BoolVar(&printPasswd, "p", defaultPrint, "")
 	flag.Usage = usage
 	flag.Parse()
 
@@ -290,7 +294,7 @@ func main() {
 		}
 
 		// generate the password from the given secret
-		password := genPassword(secret, bmark)
+		password := bmark.GetPassword(secret)
 
 		// print the password to stdout if -s is set;
 		// if not set, then copy the password to the clipboard via xsel
