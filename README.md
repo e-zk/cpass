@@ -57,10 +57,11 @@ joe.blogs@substring.com (32)
 ## dependencies
 cpass depends on the following Go modules:
 
-* crypto/pbkdf2: [golang.org/x/crypto/pbkdf2](https://godoc.org/golang.org/x/crypto/pbkdf2)  
-* crypto/ssh/terminal: [golang.org/x/crypto/ssh/terminal](https://godoc.org/golang.org/x/crypto/ssh/terminal)  
+* [github.com/atotto/clipboard](https://github.com/atotto/clipboard)
+* [golang.org/x/crypto/pbkdf2](https://godoc.org/golang.org/x/crypto/pbkdf2)  
+* [golang.org/x/crypto/ssh/terminal](https://godoc.org/golang.org/x/crypto/ssh/terminal)  
 
-Additionally, on Linux and \*BSD `xsel` is required. You can probably install it using your package manager. 
+Additionally, on Linux and \*BSD `xsel` or `xclip` is required to copy passwords to the clipboard. You can probably install either of them using your package manager. 
 
 ## status
 
@@ -72,8 +73,6 @@ cpass is still very much a work in progress, there is still much to be done.
 
 * adding + editing bookmarks  
 * removing bookmarks  
-* wayland clipboard support (idk if xsel works on wayland)  
-* moving away from xsel as a dependency on \*BSD and Linux  
 * encrypted `bookmarks.json` file for extra secrecy  
-* configuratble Terminal User Interface (TUI)  
+* configurable Terminal User Interface (TUI)  
 * GUI version(?)  
