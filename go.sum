@@ -1,5 +1,9 @@
 github.com/atotto/clipboard v0.1.2 h1:YZCtFu5Ie8qX2VmVTBnrqLSiU9XOWwqNRmdT3gIQzbY=
 github.com/atotto/clipboard v0.1.2/go.mod h1:ZY9tmq7sm5xIbd9bOK4onWV4S6X0u6GY7Vn0Yu86PYI=
+github.com/e-zk/wslcheck v0.0.0-20201130060857-c94b4f501cb1 h1:/xC0OBbXVrhiWi9wGO9E/+mc5LkaFSr7aT0LV70vzag=
+github.com/e-zk/wslcheck v0.0.0-20201130060857-c94b4f501cb1/go.mod h1:GBdxI+gcPsVhxsGV8rUrPz5J40fJiBhz+HIyI74Ib74=
+github.com/e-zk/wslcheck v0.0.0-20201130062136-8888ac748aa0 h1:AfaHPQMmx4Ob73257PWPCoHBbjaQL1I1+pv3D+AXTDU=
+github.com/e-zk/wslcheck v0.0.0-20201130062136-8888ac748aa0/go.mod h1:GBdxI+gcPsVhxsGV8rUrPz5J40fJiBhz+HIyI74Ib74=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897 h1:pLI5jrR7OSLijeIDcmRxNmw2api+jEfxLoykJVice/E=
 golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
