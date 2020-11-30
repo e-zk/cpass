@@ -16,6 +16,7 @@ build:
 deps:
 	go get golang.org/x/crypto/pbkdf2
 	go get golang.org/x/crypto/ssh/terminal
+	go get github.com/atotto/clipboard
 
 # install
 install:build
