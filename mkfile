@@ -5,7 +5,7 @@ BIN=${PREFIX}/bin
 default:V: $PROG
 
 $PROG: main.go
-	go build -o $PROG -v
+	go build -ldflags "-w -s" -o $PROG -v
 
 clean:V:
 	go clean

@@ -10,7 +10,7 @@ all: build
 
 # build the binary
 build: 
-	go build -o $(PROG) -v 
+	go build -ldflags "-w -s" -o $(PROG) -v
 
 # install third-party dependencies (2)
 deps:
