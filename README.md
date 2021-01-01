@@ -1,3 +1,5 @@
+_Note: cpass is a work in progress. Work is currently being done to rewrite most of it, as such at this time it should be considered unstable._
+
 # cpass
 
 CLI password manager written in Go.
