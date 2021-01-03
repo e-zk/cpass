@@ -171,6 +171,25 @@ func (s Store) AddEntry(entryId string, length int) error {
 	return nil
 }
 
+func (s Store) EntryExists(entryId string) (exists bool, err error) {
+	var (
+		es Entries
+	)
+
+	es, err = s.Entries()
+	if err != nil {
+		return false, err
+	}
+
+	for _, e := range es {
+		if e.Id() == entryId {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
 // delete a passwoard entry
 func (s Store) RemoveEntry(entryId string) error {
 	var (
