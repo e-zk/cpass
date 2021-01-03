@@ -5,19 +5,22 @@ import (
 	"fmt"
 	"log"
 	"os"
-	//"strings"
 
 	"github.com/e-zk/cpass/store"
+	"github.com/e-zk/cpass/term"
 )
 
 const (
-	warnPrint = "warning: will print password to standard output"
+	warnPrint  = "warning: will print password to standard output"
+	defaultLen = 16
 )
 
-// wrapper for Fprintf to print to stdout
-func errPrint(format string, a ...interface{}) {
-	fmt.Fprintf(os.Stderr, format, a...)
-}
+var (
+	err          error
+	defaultStore string
+	storePath    string
+	printPasswd  bool
+)
 
 // subcommand flags
 var (
@@ -27,6 +30,11 @@ var (
 	saveFlag = flag.NewFlagSet("save", flag.ExitOnError)
 	rmFlag   = flag.NewFlagSet("rm", flag.ExitOnError)
 )
+
+// wrapper for Fprintf to print to stdout
+func errPrint(format string, a ...interface{}) {
+	fmt.Fprintf(os.Stderr, format, a...)
+}
 
 // give all flags help messages
 func commandHelp() {
@@ -51,11 +59,15 @@ func commandHelp() {
 	}
 
 	saveFlag.Usage = func() {
-		fmt.Printf("usage: cpass save [-l len] [-p] [-s store] <user@site>\n\n")
+		errPrint("save a new password entry\n")
+		errPrint("usage: cpass save [-l len] [-p] [-s store] <user@site>\n\n")
+		errPrint("    -l len      specify password length (default 16)\n")
+		errPrint("    -p          print password to stdout\n")
+		errPrint("    -s store    use password store\n")
 	}
 
 	rmFlag.Usage = func() {
-		fmt.Printf("usage: cpass rm [-f] [-s store] <user@site>\n\n")
+		errPrint("usage: cpass rm [-f] [-s store] <user@site>\n\n")
 	}
 }
 
@@ -71,28 +83,150 @@ func usage() {
 	errPrint("for help with subcommands type: cpass [command] -h\n")
 }
 
+// list all password entries
+func list() {
+	lsFlag.StringVar(&storePath, "s", defaultStore, "")
+	lsFlag.Parse(os.Args[2:])
+
+	s, err := store.NewStore(storePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	entries, err := s.Entries()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	print(entries.String())
+}
+
+// save a new password entry
+func save() {
+	var entryLen int
+
+	saveFlag.IntVar(&entryLen, "l", defaultLen, "")
+	saveFlag.StringVar(&storePath, "s", defaultStore, "")
+	saveFlag.BoolVar(&printPasswd, "p", false, "")
+	saveFlag.Parse(os.Args[2:])
+
+	entryId := saveFlag.Arg(0)
+
+	if entryId == "help" {
+		saveFlag.Usage()
+		return
+	}
+
+	s, err := store.NewStore(storePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = s.AddEntry(entryId, entryLen)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+// remove a password entry
+func remove() {
+	var force bool
+
+	rmFlag.StringVar(&storePath, "s", defaultStore, "")
+	rmFlag.BoolVar(&force, "f", false, "")
+	rmFlag.Parse(os.Args[2:])
+
+	entryId := rmFlag.Arg(0)
+	if entryId == "help" {
+		rmFlag.Usage()
+		return
+	}
+
+	// create a new store
+	s, err := store.NewStore(storePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// make sure the entry exists
+	ok, err := s.EntryExists(entryId)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if !ok {
+		log.Fatalf("entry %s does not exist", entryId)
+	}
+
+	if !force {
+		ch, err := term.Ask("remove entry " + entryId + "?")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if !ch {
+			errPrint("aborted.\n")
+			return
+		}
+	}
+
+	err = s.RemoveEntry(entryId)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+// open a password entry
+func open() {
+	openFlag.StringVar(&storePath, "s", defaultStore, "")
+	openFlag.BoolVar(&printPasswd, "p", false, "")
+	openFlag.Parse(os.Args[2:])
+
+	if printPasswd {
+		errPrint("%s\n", warnPrint)
+	}
+
+	s, err := store.NewStore(storePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	entries, err := s.Entries()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	entryId := openFlag.Arg(0)
+	if entryId == "help" {
+		openFlag.Usage()
+		return
+	}
+
+	e := entries.Get(entryId)
+	if e == nil {
+		log.Fatal("bookmark not found")
+	}
+
+	secret, err := term.AskPasswd()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	genPasswd := e.GenPassword(secret)
+
+	if printPasswd {
+		fmt.Printf("%s\n", genPasswd)
+	}
+
+	// TODO clipboard
+}
+
 func main() {
-	const (
-		defaultPrint bool = false
-		defaultLen   int  = 16
-	)
-
-	var (
-		err          error
-		configHome   string
-		defaultStore string
-		storePath    string
-		printPasswd  bool
-		force        bool
-		length       int
-		s            store.Store
-	)
-
+	// logging
 	log.SetFlags(0)
 	log.SetPrefix("cpass: ")
 
 	// get default password store location
-	configHome, err = os.UserConfigDir()
+	configHome, err := os.UserConfigDir()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -107,106 +241,15 @@ func main() {
 	case "help":
 		usage()
 	case "ls":
-		lsFlag.StringVar(&storePath, "s", defaultStore, "")
-		lsFlag.Parse(os.Args[2:])
-
-		s, err := store.NewStore(storePath)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		entries, err := s.Entries()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		print(entries.String())
-
+		list()
 	case "save":
-		saveFlag.IntVar(&length, "l", defaultLen, "")
-		saveFlag.StringVar(&storePath, "s", defaultStore, "")
-		saveFlag.BoolVar(&printPasswd, "p", defaultPrint, "")
-		saveFlag.Parse(os.Args[2:])
-
-		entryId := saveFlag.Arg(0)
-
-		if entryId == "help" {
-			saveFlag.Usage()
-			return
-		}
-
-		s, err = store.NewStore(storePath)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		err = s.AddEntry(entryId, length)
-		if err != nil {
-			log.Fatal(err)
-		}
+		save()
 	case "rm":
-		rmFlag.StringVar(&storePath, "s", defaultStore, "")
-		rmFlag.BoolVar(&force, "f", false, "")
-		rmFlag.Parse(os.Args[2:])
-
-		entryId := rmFlag.Arg(0)
-		if entryId == "help" {
-			rmFlag.Usage()
-			return
-		}
-
-		s, err = store.NewStore(storePath)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		err = s.RemoveEntry(entryId)
-		if err != nil {
-			log.Fatal(err)
-		}
+		remove()
 	case "open":
-		openFlag.StringVar(&storePath, "s", defaultStore, "")
-		openFlag.BoolVar(&printPasswd, "p", defaultPrint, "")
-		openFlag.Parse(os.Args[2:])
-
-		if printPasswd {
-			errPrint("%s\n", warnPrint)
-		}
-
-		s, err = store.NewStore(storePath)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		entries, err := s.Entries()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		entryId := openFlag.Arg(0)
-		if entryId == "help" {
-			openFlag.Usage()
-			return
-		}
-
-		// this is kept here for future reference
-		//i := strings.LastIndex(entryId, "@")
-		//user := givenBark[:i]
-		//url := entryId[i+1:]
-
-		e := entries.Get(entryId)
-		if e == nil {
-			log.Fatal("bookmark not found")
-		}
-
-		// TODO : get secret input
-
-		if printPasswd {
-			fmt.Printf("%s\n", e.GenPassword([]byte("test")))
-		}
-
+		open()
 	default:
-		fmt.Fprintf(os.Stderr, "unknown command `%s'\n", os.Args[1])
+		errPrint("unknown command `%s'\n", os.Args[1])
 		usage()
 		os.Exit(1)
 	}
