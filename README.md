@@ -1,4 +1,5 @@
-_Note: cpass is a work in progress. Work is currently being done to rewrite most of it (checkout `-dev` branch), with support for multiple password stores and encryption. As such at this time cpass should be considered unstable._
+_Note: cpass is a work in progress. Work is currently being done to rewrite most of it, with reworked argument parsing, support for multiple password stores and encrypted password stores._ (checkout the [dev branch](https://github.com/e-zk/cpass/tree/dev)).  
+_At this time cpass should be considered unstable._
 
 # cpass
 
