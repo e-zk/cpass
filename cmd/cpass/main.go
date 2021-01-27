@@ -1,18 +1,25 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 
 	"github.com/e-zk/cpass/store"
 	"github.com/e-zk/cpass/term"
+
+	"github.com/atotto/clipboard"
+	"github.com/e-zk/wslcheck"
 )
 
 const (
-	warnPrint  = "warning: will print password to standard output"
-	defaultLen = 16
+	wslClipPath = "/mnt/c/Windows/system32/clip.exe"
+	warnPrint   = "warning: will print password to standard output"
+	defaultLen  = 16
 )
 
 var (
@@ -39,7 +46,7 @@ func errPrint(format string, a ...interface{}) {
 // give all flags help messages
 func commandHelp() {
 	lsFlag.Usage = func() {
-		errPrint("list all entries in store")
+		errPrint("list all entries in store\n")
 		errPrint("usage: cpass ls [-s store]\n\n")
 		errPrint("    -s store    use given password store\n")
 	}
@@ -67,7 +74,10 @@ func commandHelp() {
 	}
 
 	rmFlag.Usage = func() {
+		errPrint("remove a password entry\n")
 		errPrint("usage: cpass rm [-f] [-s store] <user@site>\n\n")
+		errPrint("    -f          force - do not prompt before removing")
+		errPrint("    -s store    use password store")
 	}
 }
 
@@ -76,6 +86,7 @@ func usage() {
 	errPrint("usage: cpass [command] [args]\n\n")
 	errPrint("where [command] can be:\n")
 	errPrint("    help    show this help message\n")
+	errPrint("    ls      list password entries\n")
 	errPrint("    open    open/view a password entry\n")
 	errPrint("    save    save/add a new password entry\n")
 	errPrint("    rm      remove password entry\n")
@@ -83,10 +94,40 @@ func usage() {
 	errPrint("for help with subcommands type: cpass [command] -h\n")
 }
 
+//
+func clip(text string) (err error) {
+	wsl, err := wslcheck.Check()
+	if err != nil {
+		return err
+	}
+
+	if wsl {
+		cmd := exec.Command(wslClipPath)
+		cmd.Stdin = bytes.NewBuffer([]byte(text))
+		err = cmd.Run()
+		if err != nil {
+			return err
+		}
+	} else {
+		err = clipboard.WriteAll(text)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // list all password entries
 func list() {
 	lsFlag.StringVar(&storePath, "s", defaultStore, "")
 	lsFlag.Parse(os.Args[2:])
+
+	help := lsFlag.Arg(0)
+	if help == "help" {
+		lsFlag.Usage()
+		return
+	}
 
 	s, err := store.NewStore(storePath)
 	if err != nil {
@@ -206,6 +247,7 @@ func open() {
 		log.Fatal("bookmark not found")
 	}
 
+	// ask for secret
 	secret, err := term.AskPasswd()
 	if err != nil {
 		log.Fatal(err)
@@ -215,9 +257,38 @@ func open() {
 
 	if printPasswd {
 		fmt.Printf("%s\n", genPasswd)
+		return
 	}
 
-	// TODO clipboard
+	err = clip(genPasswd)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+//
+func ed() {
+	tempFile := os.TempDir() + "/file.txt"
+
+	var cont []byte = []byte(` :username
+ :site
+ :length
+`)
+
+	err := ioutil.WriteFile(tempFile, cont, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	cmd := exec.Command(os.Getenv("EDITOR"), tempFile)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	err = cmd.Run()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func main() {
@@ -235,6 +306,12 @@ func main() {
 	// setup subcommand help messages
 	commandHelp()
 
+	//
+	if len(os.Args) <= 1 {
+		usage()
+		os.Exit(1)
+	}
+
 	// parse subcommand
 	subcommand := os.Args[1]
 	switch subcommand {
@@ -244,6 +321,8 @@ func main() {
 		list()
 	case "save":
 		save()
+	case "ed":
+		ed()
 	case "rm":
 		remove()
 	case "open":
