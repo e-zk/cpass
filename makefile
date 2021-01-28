@@ -7,3 +7,4 @@ build:
 
 clean:
 	go clean
+	rm -f cpass
