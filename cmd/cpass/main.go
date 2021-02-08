@@ -29,56 +29,9 @@ var (
 	printPasswd  bool
 )
 
-// subcommand flags
-var (
-	lsFlag   = flag.NewFlagSet("ls", flag.ExitOnError)
-	findFlag = flag.NewFlagSet("find", flag.ExitOnError)
-	openFlag = flag.NewFlagSet("open", flag.ExitOnError)
-	saveFlag = flag.NewFlagSet("save", flag.ExitOnError)
-	rmFlag   = flag.NewFlagSet("rm", flag.ExitOnError)
-)
-
 // wrapper for Fprintf to print to stdout
 func errPrint(format string, a ...interface{}) {
 	fmt.Fprintf(os.Stderr, format, a...)
-}
-
-// give all flags help messages
-func commandHelp() {
-	lsFlag.Usage = func() {
-		errPrint("list all entries in store\n")
-		errPrint("usage: cpass ls [-s store]\n\n")
-		errPrint("    -s store    use given password store\n")
-	}
-
-	findFlag.Usage = func() {
-		errPrint("find password entries containing substring\n")
-		errPrint("usage: cpass find [-s store] <substring>\n\n")
-		errPrint("    -s store    use password store\n")
-	}
-
-	openFlag.Usage = func() {
-		errPrint("open a password entry\n")
-		errPrint("usage: cpass open [-p] [-s store] [-k key_file] <user@site>\n\n")
-		errPrint("    -p             print password to stdout\n")
-		errPrint("    -s store       use password store\n")
-		errPrint("    -k key_file    supply key_file when using an encrypted store\n")
-	}
-
-	saveFlag.Usage = func() {
-		errPrint("save a new password entry\n")
-		errPrint("usage: cpass save [-l len] [-p] [-s store] <user@site>\n\n")
-		errPrint("    -l len      specify password length (default 16)\n")
-		errPrint("    -p          print password to stdout\n")
-		errPrint("    -s store    use password store\n")
-	}
-
-	rmFlag.Usage = func() {
-		errPrint("remove a password entry\n")
-		errPrint("usage: cpass rm [-f] [-s store] <user@site>\n\n")
-		errPrint("    -f          force - do not prompt before removing")
-		errPrint("    -s store    use password store")
-	}
 }
 
 // main usage/help message
@@ -120,6 +73,12 @@ func clip(text string) (err error) {
 
 // list all password entries
 func list() {
+	lsFlag := flag.NewFlagSet("ls", flag.ExitOnError)
+	lsFlag.Usage = func() {
+		errPrint("list all entries in store\n")
+		errPrint("usage: cpass ls [-s store]\n\n")
+		errPrint("    -s store    use given password store\n")
+	}
 	lsFlag.StringVar(&storePath, "s", defaultStore, "")
 	lsFlag.Parse(os.Args[2:])
 
@@ -139,13 +98,21 @@ func list() {
 		log.Fatal(err)
 	}
 
-	print(entries.String())
+	fmt.Printf("%s", entries.String())
 }
 
 // save a new password entry
 func save() {
 	var entryLen int
 
+	saveFlag := flag.NewFlagSet("save", flag.ExitOnError)
+	saveFlag.Usage = func() {
+		errPrint("save a new password entry\n")
+		errPrint("usage: cpass save [-l len] [-p] [-s store] <user@site>\n\n")
+		errPrint("    -l len      specify password length (default 16)\n")
+		errPrint("    -p          print password to stdout\n")
+		errPrint("    -s store    use password store\n")
+	}
 	saveFlag.IntVar(&entryLen, "l", defaultLen, "")
 	saveFlag.StringVar(&storePath, "s", defaultStore, "")
 	saveFlag.BoolVar(&printPasswd, "p", false, "")
@@ -173,6 +140,13 @@ func save() {
 func remove() {
 	var force bool
 
+	rmFlag := flag.NewFlagSet("rm", flag.ExitOnError)
+	rmFlag.Usage = func() {
+		errPrint("remove a password entry\n")
+		errPrint("usage: cpass rm [-f] [-s store] <user@site>\n\n")
+		errPrint("    -f          force - do not prompt before removing")
+		errPrint("    -s store    use password store")
+	}
 	rmFlag.StringVar(&storePath, "s", defaultStore, "")
 	rmFlag.BoolVar(&force, "f", false, "")
 	rmFlag.Parse(os.Args[2:])
@@ -218,6 +192,14 @@ func remove() {
 
 // open a password entry
 func open() {
+	openFlag := flag.NewFlagSet("open", flag.ExitOnError)
+	openFlag.Usage = func() {
+		errPrint("open a password entry\n")
+		errPrint("usage: cpass open [-p] [-s store] [-k key_file] <user@site>\n\n")
+		errPrint("    -p             print password to stdout\n")
+		errPrint("    -s store       use password store\n")
+		errPrint("    -k key_file    supply key_file when using an encrypted store\n")
+	}
 	openFlag.StringVar(&storePath, "s", defaultStore, "")
 	openFlag.BoolVar(&printPasswd, "p", false, "")
 	openFlag.Parse(os.Args[2:])
@@ -302,9 +284,6 @@ func main() {
 		log.Fatal(err)
 	}
 	defaultStore = configHome + "/cpass/bookmarks.json"
-
-	// setup subcommand help messages
-	commandHelp()
 
 	//
 	if len(os.Args) <= 1 {
