@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -248,31 +247,6 @@ func open() {
 	}
 }
 
-//
-func ed() {
-	tempFile := os.TempDir() + "/file.txt"
-
-	var cont []byte = []byte(` :username
- :site
- :length
-`)
-
-	err := ioutil.WriteFile(tempFile, cont, 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	cmd := exec.Command(os.Getenv("EDITOR"), tempFile)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	err = cmd.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
 func main() {
 	// logging
 	log.SetFlags(0)
@@ -285,7 +259,6 @@ func main() {
 	}
 	defaultStore = configHome + "/cpass/bookmarks.json"
 
-	//
 	if len(os.Args) <= 1 {
 		usage()
 		os.Exit(1)
@@ -300,8 +273,6 @@ func main() {
 		list()
 	case "save":
 		save()
-	case "ed":
-		ed()
 	case "rm":
 		remove()
 	case "open":
