@@ -3,7 +3,7 @@
 .PHONY: clean build
 
 build:
-	go build -ldflags "-w -s" -o cpass -v ./cmd/cpass
+	go build -ldflags "-w -s" -o cpass -v main.go
 
 clean:
 	go clean
