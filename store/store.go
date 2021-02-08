@@ -47,7 +47,7 @@ type Entry struct {
 	Length   int    `json:"length"`
 }
 
-// typdef a slice of entry structs
+// typedef a slice of entry structs
 type Entries []Entry
 
 // create a new store struct based on the given password store filepath
@@ -93,7 +93,7 @@ func (s Store) Entries() (es Entries, err error) {
 		jsonBytes []byte
 	)
 
-	// TODO
+	// TODO: Encryption
 	if s.Encrypted {
 		return nil, ErrStoreEnc
 	}
@@ -138,7 +138,7 @@ func (s Store) AddEntry(entryId string, length int) error {
 		Length:   length,
 	}
 
-	// TODO
+	// TODO: Encryption
 	if s.Encrypted {
 		return ErrStoreEnc
 	}
@@ -171,6 +171,7 @@ func (s Store) AddEntry(entryId string, length int) error {
 	return nil
 }
 
+// check if an entry exists within a store
 func (s Store) EntryExists(entryId string) (exists bool, err error) {
 	var (
 		es Entries
@@ -190,7 +191,7 @@ func (s Store) EntryExists(entryId string) (exists bool, err error) {
 	return false, nil
 }
 
-// delete a passwoard entry
+// delete a passwoard entry from a store
 func (s Store) RemoveEntry(entryId string) error {
 	var (
 		err       error
@@ -237,13 +238,13 @@ func (s Store) RemoveEntry(entryId string) error {
 	return nil
 }
 
-// output string representation of a bookmark
+// output string representation of a password entry
 func (e Entry) String() (out string) {
-	out = fmt.Sprintf("%s@%s (%d)", e.Username, e.Url, e.Length)
+	out = fmt.Sprintf("%s@%s", e.Username, e.Url)
 	return out
 }
 
-// get entry id
+// get full entry ID
 func (e Entry) Id() string {
 	return e.Username + "@" + e.Url
 }
