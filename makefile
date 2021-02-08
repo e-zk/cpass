@@ -1,9 +1,15 @@
 .POSIX:
 .SUFFIXES:
-.PHONY: clean build
+.PHONY: clean
 
-build:
+PREFIX = /usr/local
+
+cpass: main.go
 	go build -ldflags "-w -s" -o cpass -v main.go
 
+install: cpass
+	install -c -s -m 0755 cpass $(PREFIX)/bin
+
 clean:
+	rm -f cpass
 	go clean
