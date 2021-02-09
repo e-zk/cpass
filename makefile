@@ -13,3 +13,4 @@ install: cpass
 clean:
 	rm -f cpass
 	go clean
+	rm -f cpass
