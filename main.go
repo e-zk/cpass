@@ -162,7 +162,6 @@ func remove() {
 		log.Fatal(err)
 	}
 
-	// make sure the entry exists
 	ok, err := s.EntryExists(entryId)
 	if err != nil {
 		log.Fatal(err)
@@ -248,7 +247,6 @@ func open() {
 }
 
 func main() {
-	// logging
 	log.SetFlags(0)
 	log.SetPrefix("cpass: ")
 
@@ -264,7 +262,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// parse subcommand
 	subcommand := os.Args[1]
 	switch subcommand {
 	case "help":
